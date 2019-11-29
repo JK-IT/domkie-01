@@ -1,0 +1,18 @@
+<%
+if(listing != null){ %>
+  <div class="item-container">
+  <%for(var item of listing){ %>
+    <div class="items">
+      <br>
+      <h3><%= item.name%></h3>
+      <div class="img-listing-container">
+      <%for (var img of item.imglist){
+        var imgsrc = 'https://dom-buck-test.s3-us-west-2.amazonaws.com/' + prefix + item.name + '/' + img;
+      %>
+        <img src="<%= imgsrc%>" alt="item image">
+      <%}%>
+      </div>
+    </div>
+  <%}%>
+</div>  
+<%}%>

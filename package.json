@@ -1,0 +1,61 @@
+{
+  "name": "nexpage_rev",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "nodemon server.js",
+    "ver": "npm version patch"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true
+    }
+  },
+  "keywords": [
+    "manga",
+    "comic",
+    "graphic",
+    "novel",
+    "online",
+    "reading",
+    "website"
+  ],
+  "author": "Kit",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.493.0",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "crypto-js": "^3.1.9-1",
+    "dotenv": "^8.2.0",
+    "ejs": "^2.6.2",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "flat-cache": "^2.0.1",
+    "helmet": "^3.21.1",
+    "memory-cache": "^0.2.0",
+    "memorystore": "^1.6.1",
+    "passport": "^0.4.0",
+    "passport-auth0": "^1.2.1",
+    "querystring": "^0.2.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "debug": "^4.1.1",
+    "del": "^5.0.0",
+    "eslint": "^6.0.1",
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-inject": "^5.0.4",
+    "gulp-rev": "^9.0.0",
+    "gulp-uglify": "^3.0.2",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.4",
+    "uglify-js": "^3.6.0",
+    "util": "^0.12.1"
+  }
+}
