@@ -29,12 +29,11 @@ if(process.env.NODE_ENV == 'production'){
 
 
 creator.get('/',(req, res, next)=>{
-  log('creator root path ' + req.session);
+  //log('creator root path ' + req.session);
   if(req.session.loggedin){
     if(req.session.loggedin == false || req.session.loggedin == undefined){
       next();
     } else {
-      log('USER ALREADY LOGGED IN');
       res.redirect('/creator/user');
     }
   } else {
@@ -63,7 +62,6 @@ creator.get('/',(req, res, next)=>{
 }) */
 
 creator.get('/user', (req, res, next)=>{
-  log('req session ' + req.session);
   res.set({
     'Cache-Control': 'no-cache'
   })
@@ -77,8 +75,27 @@ creator.get('/user', (req, res, next)=>{
     log(prefix);
     kaw.GetUserFolder(prefix)
       .then(useritems=>{
-        log('user items ' + useritems);
-        DisplayUserPage('creator-user.ejs', useritems.Contents, req.session.userinfo, res, req);
+        var outfolder = GetItemListImg(useritems.Contents, 2);
+        log(outfolder)
+        if(outfolder == null){
+          ejs.renderFile('views/partials/creator-user.ejs', {user: req.session.userinfo, listing: null})
+          .then(str =>{
+            res.render('index', {page: str})
+          })
+          .catch(err =>{
+            errlog('error rendering page ' + err);
+            res.redirect(req.protocol + '://' + req.get('host') + '/500');
+          })
+        } else {
+          ejs.renderFile('views/partials/creator-user.ejs', {user: req.session.userinfo, listing: outfolder})
+            .then(str =>{
+              res.render('index', {page: str})
+            })
+            .catch(err=>{
+              errlog(err);
+              res.redirect(req.protocol + '://' + req.get('host') + '/500');
+            })
+        }
       })
       .catch(err =>{
         res.redirect(req.protocol + '://' + req.get('host') + '/500');
@@ -141,24 +158,44 @@ creator.get('/user', (req, res, next)=>{
             }
           })
           req.session.userinfo = userinfo; //save to session
-          var prefix = userinfo.sub + '/listing/';
+          var prefix = userinfo.sub + '/listing/'
           kaw.GetUserFolder(prefix)
           .then(userfolder =>{
-            log('USER FOLDER '+ util.inspect(userfolder, true, 2, true));
-            DisplayUserPage('creator-user.ejs', userfolder.Contents, userinfo, res, req);
+            var outfolder = GetItemListImg(userfolder.Contents, 2);
+            log(outfolder)
+            if(outfolder == null){
+              ejs.renderFile('views/partials/creator-user.ejs', {user: userinfo, listing: null})
+              .then(str =>{
+                res.render('index', {page: str})
+              })
+              .catch(err =>{
+                errlog('error rendering page ' + err);
+                res.redirect(req.protocol + '://' + req.get('host') + '/500');
+              })
+            } else {
+              ejs.renderFile('views/partials/creator-user.ejs', {user: userinfo, listing: outfolder})
+                .then(str =>{
+                  res.render('index', {page: str})
+                })
+                .catch(err=>{
+                  errlog(err);
+                  res.redirect(req.protocol + '://' + req.get('host') + '/500');
+                })
+            }
           })
           .catch(err =>{
             res.redirect(req.protocol + '://' + req.get('host') + '/500');
-          });
+          })
         })
         .catch(err =>{
           res.statusCode = 500;
           res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        });
+        })
       }
-    });
+    })
   }
-});
+  
+})
 
 creator.get('/logout', (req, res)=>{
   
@@ -187,7 +224,7 @@ creator.get('/logout', (req, res)=>{
   //res.redirect('/creator')
 })
 
-//fetch with post to this api
+//browser: fetch with post to this api
 creator.get('/user/upload', (req, res)=>{
   var credobj = kaw.GetUploadCred();
   var policydate = new Date();
@@ -242,119 +279,68 @@ creator.get('/user/getitems', (req, res)=>{
   var prefix = req.query.prefix;
   kaw.GetUserFolder(prefix)
   .then(userfolder=>{
-    GetItemListImg(userfolder.Contents, 2)
-      .then(outfolder=>{
-        res.set('Content-Type', 'application/json');
-        ejs.renderFile('views/partials/itemListing.ejs', {listing: outfolder, prefix: prefix})
-          .then(str =>{
-            res.status(200);
-            res.send(JSON.stringify({str: str}))
-          })
-          .catch(err=>{
-            log(err);
-            res.status(500);
-            res.end();
-          })
+    var outfolder = GetItemListImg(userfolder.Contents, 2);
+    res.set('Content-Type', 'application/json');
+    if(outfolder == null){
+      res.send(JSON.stringify({str: null}))
+    } else {
+      ejs.renderFile('views/partials/itemListing.ejs', {listing: outfolder, prefix: prefix})
+      .then(str =>{
+        res.status(200);
+        res.send(JSON.stringify({str: str}))
       })
-      .catch(err =>{
-        if(err == null){
-          res.send(JSON.stringify({str: null}))
-        } else {
-          log('catching err when prefetch the item ' + err);
-        }
+      .catch(err=>{
+        log(err);
+        res.status(500);
+        res.end();
       })
+    }
+  })
+  .catch(err =>{
+     
   })
 })
+
 
 /**Helper function */
 
 function GetItemListImg(inarr, inlev){
-  return new Promise((resolve, reject)=>{
-    (async function(){
-      if(inarr.length == 0){
-      reject(null);
-      }
-      var outfolder = [];
-      var obj = {
-        description: null,
-        imglist: []
-      };
-      var temparr = [];
-      for(var keyobj of inarr){
-        var itemname = (keyobj.Key.split('/').splice(-2, 1))[0];
-        if(temparr.indexOf(itemname) == -1){
-          if(obj.name != null || obj.imglist.length != 0){
-            var tobj = JSON.parse(JSON.stringify(obj));
-            outfolder.push(tobj);
-          } 
-          temparr.push(itemname);
-          obj.name = itemname;
-          obj.imglist.length = 0; //empty array
-          obj.description = null;
-
-          var objname = keyobj.Key.split('/').pop();
-          var ext = objname.split('.');
-          log(ext);
-          if(ext.length == 1 || ext.indexOf('txt') != -1){
-            log('found freckle');
-            obj.description = keyobj.Key;
-          } else {
-            obj.imglist.push(objname);
-          }
-        } else {
-          var objname = keyobj.Key.split('/').pop();
-          var ext = objname.split('.');
-          log(ext);
-          if(ext.length == 1 || ext.indexOf('txt') != -1){
-            log('found freckle');
-            obj.description = keyobj.Key;
-          } else {
-            obj.imglist.push(objname);
-          }
+  if(inarr.length == 0){
+    return null;
+  }
+  var outfolder = [];
+  var obj = {
+    imglist: []
+  };
+  var temparr = [];
+  for(var keyobj of inarr){
+    var itemname = (keyobj.Key.split('/').splice(-2, 1))[0];
+    if(temparr.indexOf(itemname) == -1){
+      if(obj.name != null || obj.imglist.length != 0){
+        var tobj = JSON.parse(JSON.stringify(obj));
+        outfolder.push(tobj);
+      } 
+      temparr.push(itemname);
+      obj.name = itemname;
+      obj.imglist.length = 0; //empty array
+      obj.imglist.push(keyobj.Key.split('/').pop());
+    } else {
+      //if item exists, look up in the folder if the name already there
+      /* for(var itemobj of outfolder){
+        if(itemobj.name == itemname){
+          itemobj.imglist.push(keyobj.Key.split('/').pop());
+          break;
         }
-        if(inarr.indexOf(keyobj) == (inarr.length -1)){
-          //this is the end of content array
-          var tobj = JSON.parse(JSON.stringify(obj));
-          outfolder.push(tobj);
-        }
-      }
-      // LOOP OVER THE ARRAY AND UPDATE THE DESCRIPTION ITEM OBJECT
-      for(let obj of outfolder){
-        var strdata = await kaw.GetBlobText('dom-upload', obj.description);
-        obj.description = JSON.parse(strdata);
-      }
-      resolve(outfolder)
-    })();
-  }) 
-}
-
-function DisplayUserPage(userpage, userfolderarray, userinfo, res, req){
-  GetItemListImg(userfolderarray, 2)
-    .then(outfolder=>{
-      log('OUT USER FOLDER LIST ' + util.inspect(outfolder, true, 2, true));
-      ejs.renderFile('views/partials/' + userpage, {user: userinfo, listing: outfolder})
-        .then(str =>{
-          res.render('index', {page: str})
-        })
-        .catch(err=>{
-          errlog(err);
-          res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        })
-      
-    })
-    .catch(err =>{
-      log('error getting image array ' + err);
-      if(err == null){
-        ejs.renderFile('views/partials/creator-user.ejs', {user: userinfo, listing: null})
-        .then(str =>{
-          res.render('index', {page: str})
-        })
-        .catch(err =>{
-          errlog('error rendering page ' + err);
-          res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        })
-      }
-    })
+      } */
+      obj.imglist.push(keyobj.Key.split('/').pop());
+    }
+    if(inarr.indexOf(keyobj) == (inarr.length -1)){
+      //this is the end of content array
+      var tobj = JSON.parse(JSON.stringify(obj));
+      outfolder.push(tobj);
+    }
+  }
+  return outfolder;
 }
 
 function securelogIn(req, res, next){
@@ -407,12 +393,79 @@ var questr = {
         }) */
 
 /*
-  if(ext.length == 1 || ext.indexOf('txt') != -1){
-    log('found freckle');
-    //getting data from blob
-    var strdata = await kaw.GetBlobText('dom-upload', keyobj.Key)
-    log('blob data ' + strdata);
-    obj.description = JSON.parse(strdata);
-    
-  }
+  this will be used to get credentials and filled up requirement to use http POST
+    USING TEMPORARY CREDENTIALS
+    CALCULATING THE SIGNATURE BY YOURSELF
+
+
+creator.get('old/user/upload', (req, res)=>{
+  //log('==== upload req header ' + JSON.stringify( req.session.idtok));
+  kaw.GetTempCred(req.session.idtok)
+    .then(data =>{
+      var tempcreobj = JSON.parse(data);
+      //log('=======++++++++++++ data from getting credential using get id ' + data)
+      
+      //get current date and add 1 more day
+        //to convert to iso format using .toISOString();
+      var policydate = new Date();
+      policydate.setDate(policydate.getDate() + 1);
+      var yyyy = policydate.getUTCFullYear().toString();
+      var mm = (policydate.getUTCMonth() + 1).toString();
+      if(mm.length == 1 ){mm = '0' + mm}
+      var dd = policydate.getUTCDate().toString();
+      if(dd.length == 1) {dd = '0' + dd};
+      var ymd = yyyy + mm + dd;
+      var amzcred = `${tempcreobj.Credentials.AccessKeyId}/${ymd}/us-west-2/s3/aws4_request`;
+      var amzdate = ymd + 'T000000Z';
+      var amzalgor = "AWS4-HMAC-SHA256";
+      //this require aws credentials
+      var policy = {
+        "expiration": policydate.toISOString(),
+        "conditions": [
+          { "acl": "public-read"},
+          {"bucket": "dom-buck-test"},
+          ["starts-with", "$key", ''],
+          ['starts-with', '$Content-Type', ''],
+          ['starts-with', '$Cache-Control', 'no-cache'],
+          {"x-amz-algorithm": amzalgor},
+          //<your-access-key-id>/<date>/<aws-region>/<aws-service>/aws4_request
+          {"x-amz-credential": amzcred},
+          {"x-amz-date": amzdate},
+          //['content-length-range', 1048579, 20971580],
+          {"x-amz-security-token" : tempcreobj.Credentials.SessionToken} //this require for temporary credentials to worke
+        ]
+      }      
+
+      var stringpolicy = JSON.stringify(policy);
+      var b64policy = Buffer.from(stringpolicy, "utf-8").toString("base64");
+      //log('string to sign ' + b64policy)
+      var kdate = crypto.HmacSHA256(ymd, 'AWS4' + tempcreobj.Credentials.SecretKey);
+      var kregion = crypto.HmacSHA256('us-west-2', kdate);
+      var kservice = crypto.HmacSHA256('s3', kregion);
+      var ksign = crypto.HmacSHA256('aws4_request', kservice);
+      //log('Signing key ' + ksign);
+      var signature = crypto.HmacSHA256(b64policy, ksign);
+      //calculate signature
+      var hexsig = signature.toString(crypto.enc.Hex);
+      //var sig = crypto.createHmac('sha256', tempcreobj.Credentials.SecretKey).update(Buffer.from(b64policy, 'utf-8')).digest('base64'); 
+      res.set({
+        'Content-Type': 'application/json'
+      });
+      var packedData = {
+        idenid: tempcreobj.IdentityId,
+        xamzcred : amzcred,
+        xamzdate : amzdate,
+        xamzalgor : amzalgor,
+        xamzacckey: tempcreobj.Credentials.AccessKeyId,
+        xamzb64poli: b64policy,
+        xamzsignature: hexsig,
+        xamzsetoken: tempcreobj.Credentials.SessionToken
+      }
+      res.send(JSON.stringify(packedData));
+    })
+    .catch(err =>{
+      errlog('we get error');
+    })
+  
+})
 */

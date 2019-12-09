@@ -1,0 +1,38 @@
+<button style="margin:10px; padding:5px" onclick="ClearSearch(event)">Close</button>
+<%
+  if(resdata.found != 0){
+    resdata.hit.forEach(function(val, inx){
+      var name = val.fields.title[0];
+      var summary = val.fields.summary[0];
+      var author = val.fields.author[0];
+      var publisher = val.fields.publisher[0];
+      var genre = val.fields.genre[0]; 
+      var imglink = 'https://donkie-booket.s3-us-west-2.amazonaws.com/' + (name.replace(" ","+")) + "/cover.jpg";
+      var type = "";
+      if(author === "" || author === " "){ 
+        type = 'comic';
+      } else {
+       type = 'manga';
+      }
+  %>
+      <div class="book-search-display" onclick="OpenBook(event, '<%= name%>','<%= type%>')">
+        <img src="<%= imglink%>" alt="Cover Image">
+        <div>
+          <p>Name :  <%= name%></p>
+          <%if(author === "" || author === " ") {%>
+            <p>Publisher : <%= publisher%></p>
+          <%} else {%>
+            <p>Author : <%= author%></p>
+            <p>Genre : <%= genre%></p>
+          <%}%>
+          <p>Summary : <%= summary%></p>
+        </div>
+      </div>
+    <%})%>
+  <%} else {%>
+    <div>
+      <p>Cannot find your book</p>
+    </div>
+  <%}%>
+    
+

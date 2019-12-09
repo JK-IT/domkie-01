@@ -58,14 +58,9 @@
             <img src="<%= imgsrc%>" alt="item image">
           <%}%>
           </div>
-          <div class="item-description">
-            <p>Email: <%= item.description.email%></p>
-            <p>Description: <%= item.description.description%></p>
-          </div>
-          <hr style="width: 50%;margin:auto">
         </div>
       <%}%>
-      </div>
+    </div>  
     <%}%>
     <br>
     <p> Do you have any unused items?</p>  
@@ -75,20 +70,12 @@
     <form id="uploadListingForm">
       <fieldset>
         <div>
-          <label for="itemName">Item Name:</label>
+          <label for="itemName">Item Name</label>
           <input type="text" name="itemName" required>
         </div>
         <div>
-          <label for="email">Email: </label>
-          <input type="email" name="email" required>
-        </div>
-        <div>
-          <label for="description">Description: </label>
-          <textarea name="description" cols="30" rows="2" required></textarea>
-        </div>
-        <div>
-          <label for="file">Item Images:</label>
-          <input type="file" name="file" accept="image/*" multiple required>
+          <label for="file">Item Image</label>
+          <input type="file" name="file" accept="image/*" multiple>
         </div>
         <div>
           <input type="button" onclick="UploadListing(event, '<%= user.sub%>')" value="Upload">

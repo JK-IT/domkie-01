@@ -198,7 +198,7 @@ kaw.CallComic = function(startkey = null, lim = limit){
   })
 }
 //----------&&&&&&&&&&&&&&&&&&&&&&&&
-//listing book by comic or manga
+
 kaw.CallBook = function(type, startkey = null) {
   var par = {
     TableName: 'book_table',
@@ -224,7 +224,7 @@ kaw.CallBook = function(type, startkey = null) {
   })
 }
 
-//get book from s3 don book, list all book chapters
+//get book from s3 don book
 kaw.GetBooks3 = function (title){
   var np = title + '/'//;
   var par = {
@@ -423,28 +423,6 @@ kaw.GetUploadCred = function(){
     id: process.env.domadm,
     key:process.env.domkey
   }
-}
-
-kaw.GetBlobText = function(bucket, key){
-  var par = {
-    Bucket: bucket,
-    Key: key
-  }
-  var txtbin = s3.getObject(par).createReadStream().setEncoding('utf-8');
-  return new Promise((resolve, reject)=>{
-    var dat = '';
-    txtbin.on('data', (chunk)=>{
-      dat += chunk;
-    })
-    txtbin.on('error', (err)=>{
-      des3err('error from reading blob in KAW ' + err);
-      reject(err);
-    })
-    txtbin.on('end', ()=>{
-      resolve(dat);
-    })
-  })
-  
 }
 //using presigned url to save cost from using temporary credentials with IDENTITY POOL ID
 //-- using this u don't have to calculate signature for your temporary credentials
