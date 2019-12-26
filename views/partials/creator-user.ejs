@@ -32,7 +32,7 @@
         <div>
           <input type="file" name="file" accept="image/*">
         </div>
-        <div>
+        <div class="button-group">
           <input type="button" value="Upload">
         </div>
 
@@ -62,7 +62,31 @@
             <p>Email: <%= item.description.email%></p>
             <p>Description: <%= item.description.description%></p>
           </div>
-          <hr style="width: 50%;margin:auto">
+          <!--edit part-->
+          <div style='display: none;'>
+            <form class="upload-form" name="editForm" autocomplete="on">
+              <div>
+                <label for="email">Email: </label>
+                <input type="email" name="editEmail">
+              </div>
+              <div>
+                <label for="description">Description: </label>
+                <input type="text" name="editDescription">
+              </div>
+              <div>
+                <label for="file">Item Files</label>
+                <input type="file" name="file" accept="image/*" multiple>
+              </div>
+            </form>
+          </div>
+          <!--edit part-->
+          <div class="button-group">
+            <button class="delete-butt" onclick="DeleteObjects(event, '<%= user.sub%>', '<%= item.name%>')">Delete</button>
+            <button class="edit-butt" onclick="EditListing(event, '<%= user.sub%>', '<%= item.name%>')">Edit</button>
+            <span class="err-span hidden" ></span>
+          </div>
+          <hr style="width: 50%;margin:auto;height: 1px;outline: none;border: none;background-color: gray;">
+          
         </div>
       <%}%>
       </div>
@@ -72,7 +96,7 @@
 
   <!--  <form id="upload-listing-form" action="http://dom-buck-test.s3.amazonaws.com/" method="POST" enctype="multipart/form-data" accept-charset="UTF-8"> -->
 
-    <form id="uploadListingForm">
+    <form id="uploadListingForm" autocomplete="on">
       <fieldset>
         <div>
           <label for="itemName">Item Name:</label>
@@ -87,10 +111,10 @@
           <textarea name="description" cols="30" rows="2" required></textarea>
         </div>
         <div>
-          <label for="file">Item Images:</label>
+          <label for="file">Item Files:</label>
           <input type="file" name="file" accept="image/*" multiple required>
         </div>
-        <div>
+        <div class="button-group">
           <input type="button" onclick="UploadListing(event, '<%= user.sub%>')" value="Upload">
         </div>
       </fieldset>

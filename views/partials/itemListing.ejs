@@ -7,7 +7,7 @@ if(listing != null){ %>
       <h3><%= item.name%></h3>
       <div class="img-listing-container">
       <%for (var img of item.imglist){
-        var imgsrc = 'https://dom-upload.s3-us-west-2.amazonaws.com/' + prefix + item.name + '/' + img;
+        var imgsrc = 'https://dom-upload.s3-us-west-2.amazonaws.com/' + usersub + '/listing/' + item.name + '/' + img;
       %>
         <img src="<%= imgsrc%>" alt="item image">
       <%}%>
@@ -17,6 +17,30 @@ if(listing != null){ %>
         <p>Description: <%= item.description.description%></p>
       </div>
     </div>
+    <!--Edit part-->
+    <div>
+      <form class="upload-form" name="editForm" autocomplete="on">
+        <div>
+          <label for="email">Email: </label>
+          <input type="email" name="editEmail">
+        </div>
+        <div>
+          <label for="description">Description: </label>
+          <input type="text" name="editDescription">
+        </div>
+        <div>
+          <label for="file">Item Files</label>
+          <input type="file" name="file" accept="image/*" multiple>
+        </div>
+      </form>
+    </div>
+    <!--edit part-->
+    <div class="button-group">
+      <button class="delete-butt" onclick="DeleteObjects(event, '<%= user.sub%>', '<%= item.name%>')">Delete</button>
+      <button class="edit-butt" onclick="EditListing(event, '<%= usersub%>', '<%= item.name%>')">Edit</button>
+      <span class="err-span hidden" ></span>
+    </div>
+
   <%}%>
 </div>  
 <%}%>

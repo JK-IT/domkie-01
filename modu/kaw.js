@@ -13,7 +13,7 @@ if(process.env.NODE_ENV != 'production'){
       console.error('Error loading credentials ' + err.stack);
     }
   }) */
-  var cred = new kawaz.SharedIniFileCredentials({profile: 'readcornerAdmin'})
+  var cred = new kawaz.SharedIniFileCredentials({profile: 'readcornerAdmin'});
   kawaz.config.credentials = cred;
 }
 
@@ -411,7 +411,7 @@ kaw.GetUserFolder = function(prefix){
         des3err('error - get user folder ' + err);
         reject(err);
       } else {
-        //des3(data);
+        des3(data);
         resolve(data);
       }
     })
@@ -437,8 +437,8 @@ kaw.GetBlobText = function(bucket, key){
       dat += chunk;
     })
     txtbin.on('error', (err)=>{
-      des3err('error from reading blob in KAW ' + err);
-      reject(err);
+      des3err('error GET BLOB TEXT in KAW ' + err);
+      reject(false);
     })
     txtbin.on('end', ()=>{
       resolve(dat);
@@ -446,6 +446,26 @@ kaw.GetBlobText = function(bucket, key){
   })
   
 }
+
+kaw.DeleteObjs = function(bucket, key){
+  let par = {
+    Bucket: bucket,
+    Key: key
+  }
+  return new Promise((resolve, reject)=>{
+    s3.deleteObject(par, (err, data)=>{
+      if(err){
+        des3err(err);
+        reject(false);
+      } else {
+        des3(data);
+        resolve(true);
+      }
+    })
+  })
+}
+
+
 //using presigned url to save cost from using temporary credentials with IDENTITY POOL ID
 //-- using this u don't have to calculate signature for your temporary credentials
 /* kaw.GetSignedPost = function(){

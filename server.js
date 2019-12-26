@@ -18,28 +18,40 @@ var port = 8008;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.set('trust proxy', 1); //setting this so u can set session or cookie when u have nodejs 
-  //behind a proxy
-app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: 43200000, //half of a day
-  setHeaders: function(res, path, stat){
-    
-  }
-}));
+app.set('trust proxy', 1); //setting this so u can set session or cookie when u have nodejs behind a proxy
+
+if(process.env.NODE_ENV == 'production'){
+  app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 43200000, //half of a day
+    setHeaders: function(res, path, stat){
+      
+    }
+  }));
+} else {
+  app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 0, //half of a day
+    setHeaders: function(res, path, stat){
+      
+    }
+  }));
+}
+
 app.use(helmet());
 
 app.use(bdpar.json());
-app.use(bdpar.urlencoded({extended:false}))
+app.use(bdpar.urlencoded({extended:false}));
 app.use ((req, res, next)=>{
   if(process.env.NODE_ENV == 'production'){
     res.set({
       'Cache-Control': 'public',
-    })
+    });
   } else {
-    
+    res.set({
+      'Cache-Control': 'no-cache'
+    });
   }
   next();
-})
+});
 app.use(cors());
 
 var sess={

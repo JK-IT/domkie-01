@@ -74,10 +74,10 @@ creator.get('/user', (req, res, next)=>{
     //log('user session exist ' + (req.header('x-forwarded-for') || req.connection.remoteAddress));
     //caling aws s3 to get items from server if user have it
     var prefix = req.session.userinfo.sub + '/listing/';
-    log(prefix);
+    //log(prefix);
     kaw.GetUserFolder(prefix)
       .then(useritems=>{
-        log('user items ' + useritems);
+        //log('user items ' + useritems);
         DisplayUserPage('creator-user.ejs', useritems.Contents, req.session.userinfo, res, req);
       })
       .catch(err =>{
@@ -144,7 +144,7 @@ creator.get('/user', (req, res, next)=>{
           var prefix = userinfo.sub + '/listing/';
           kaw.GetUserFolder(prefix)
           .then(userfolder =>{
-            log('USER FOLDER '+ util.inspect(userfolder, true, 2, true));
+            //log('USER FOLDER '+ util.inspect(userfolder, true, 2, true));
             DisplayUserPage('creator-user.ejs', userfolder.Contents, userinfo, res, req);
           })
           .catch(err =>{
@@ -187,7 +187,7 @@ creator.get('/logout', (req, res)=>{
   //res.redirect('/creator')
 })
 
-//fetch with post to this api
+//fetch with post to this api -- creator/user/upload
 creator.get('/user/upload', (req, res)=>{
   var credobj = kaw.GetUploadCred();
   var policydate = new Date();
@@ -234,21 +234,23 @@ creator.get('/user/upload', (req, res)=>{
     amz64poli: b64policy,
     amzsig: hexsig
   }
-  res.send(JSON.stringify(packedData));
-})
+  res.end(JSON.stringify(packedData));
+});
 
-//browser: fetch to get item to this api
+//browser: fetch to get item to this api -- creator/user/getitems?query
 creator.get('/user/getitems', (req, res)=>{
-  var prefix = req.query.prefix;
+  var usersub = req.query.usersub;
+  var itemname = req.query.itemname;
+  var prefix = usersub + '/listing/' + (itemname? itemname: '');
   kaw.GetUserFolder(prefix)
   .then(userfolder=>{
     GetItemListImg(userfolder.Contents, 2)
       .then(outfolder=>{
         res.set('Content-Type', 'application/json');
-        ejs.renderFile('views/partials/itemListing.ejs', {listing: outfolder, prefix: prefix})
+        ejs.renderFile('views/partials/itemListing.ejs', {listing: outfolder, usersub: usersub})
           .then(str =>{
             res.status(200);
-            res.send(JSON.stringify({str: str}))
+            res.end(JSON.stringify({str: str}))
           })
           .catch(err=>{
             log(err);
@@ -258,13 +260,30 @@ creator.get('/user/getitems', (req, res)=>{
       })
       .catch(err =>{
         if(err == null){
-          res.send(JSON.stringify({str: null}))
+          res.end(JSON.stringify({str: null}))
         } else {
-          log('catching err when prefetch the item ' + err);
+          log('catching err when fetching the item ' + err);
         }
       })
   })
-})
+});
+
+//browser: fetch to delete objects
+creator.get('/user/deleteobj', (req, res)=>{
+  let subuser = req.query.subuser;
+  let item = req.query.itemname;
+  let key = subuser + '/listing/' + item;
+  kaw.DeleteObjs('dom-upload', key)
+  .then(delres=>{
+    if(delres){ //delres = true
+      res.set('Content-Type', 'application/json');
+      res.end(JSON.stringify({success: delres}));
+    }
+  }).catch(err=>{ //err = false
+    res.set('Content-Type', 'application/json');
+    res.end(JSON.stringify({success: err}));
+  });
+});
 
 /**Helper function */
 
@@ -284,54 +303,68 @@ function GetItemListImg(inarr, inlev){
         var itemname = (keyobj.Key.split('/').splice(-2, 1))[0];
         if(temparr.indexOf(itemname) == -1){
           if(obj.name != null || obj.imglist.length != 0){
-            var tobj = JSON.parse(JSON.stringify(obj));
-            outfolder.push(tobj);
+            outfolder.push(JSON.parse(JSON.stringify(obj)));
           } 
           temparr.push(itemname);
           obj.name = itemname;
           obj.imglist.length = 0; //empty array
-          obj.description = null;
+          obj.description = {};
 
-          var objname = keyobj.Key.split('/').pop();
-          var ext = objname.split('.');
-          log(ext);
+          let objname = keyobj.Key.split('/').pop();
+          let ext = objname.split('.');
           if(ext.length == 1 || ext.indexOf('txt') != -1){
-            log('found freckle');
-            obj.description = keyobj.Key;
+            log(ext);
+            
+            if((keyobj.Key.split('/').pop()[0]).match(/email/ig)){
+              log('found email');
+              obj.description.email = keyobj.Key;
+            } else {
+              log('found freckle');
+              obj.description.description = keyobj.Key;
+            }
           } else {
             obj.imglist.push(objname);
           }
         } else {
-          var objname = keyobj.Key.split('/').pop();
-          var ext = objname.split('.');
-          log(ext);
+          let objname = keyobj.Key.split('/').pop();
+          let ext = objname.split('.');
+          //log(ext);
           if(ext.length == 1 || ext.indexOf('txt') != -1){
-            log('found freckle');
-            obj.description = keyobj.Key;
+            
+            if(ext[0].match(/(^email)./ig)){
+              //log('found email');
+              obj.description.email = keyobj.Key;
+            } else {
+              //log('found freckle');
+              obj.description.description = keyobj.Key;
+            }
           } else {
             obj.imglist.push(objname);
           }
         }
         if(inarr.indexOf(keyobj) == (inarr.length -1)){
           //this is the end of content array
-          var tobj = JSON.parse(JSON.stringify(obj));
-          outfolder.push(tobj);
+          outfolder.push(JSON.parse(JSON.stringify(obj)));
         }
       }
       // LOOP OVER THE ARRAY AND UPDATE THE DESCRIPTION ITEM OBJECT
       for(let obj of outfolder){
-        var strdata = await kaw.GetBlobText('dom-upload', obj.description);
-        obj.description = JSON.parse(strdata);
+        /* var strdata = await kaw.GetBlobText('dom-upload', obj.description);
+        obj.description = JSON.parse(strdata); */ 
+        var email = await kaw.GetBlobText('dom-upload', obj.description.email);
+        obj.description.email = (JSON.parse(email)).email;
+        var description = await kaw.GetBlobText('dom-upload', obj.description.description);
+        obj.description.description = (JSON.parse(description)).description;
       }
-      resolve(outfolder)
+      resolve(outfolder);
     })();
-  }) 
+  }); 
 }
 
 function DisplayUserPage(userpage, userfolderarray, userinfo, res, req){
   GetItemListImg(userfolderarray, 2)
     .then(outfolder=>{
-      log('OUT USER FOLDER LIST ' + util.inspect(outfolder, true, 2, true));
+      //log('OUT USER FOLDER LIST ' + util.inspect(outfolder, true, 2, true));
       ejs.renderFile('views/partials/' + userpage, {user: userinfo, listing: outfolder})
         .then(str =>{
           res.render('index', {page: str})
@@ -339,7 +372,7 @@ function DisplayUserPage(userpage, userfolderarray, userinfo, res, req){
         .catch(err=>{
           errlog(err);
           res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        })
+        });
       
     })
     .catch(err =>{
@@ -352,9 +385,9 @@ function DisplayUserPage(userpage, userfolderarray, userinfo, res, req){
         .catch(err =>{
           errlog('error rendering page ' + err);
           res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        })
+        });
       }
-    })
+    });
 }
 
 function securelogIn(req, res, next){
@@ -368,6 +401,16 @@ function securelogIn(req, res, next){
 }
 module.exports = creator;
 
+
+/*  OUTFOLDER LISTING 
+
+[ { description: { description: 'huij', email: 'im@gm.com' },
+       imglist: [ 'jeans1.jpg', [length]: 1 ],
+        name: 'kit' },
+      { description: { description: 'imitem2', email: 'im@lko.com' },
+        imglist: [ 'drink1.jpg', [length]: 1 ],
+        name: 'kit1' },
+      [length]: 2 ] */
 
 /*
 var questr = {
