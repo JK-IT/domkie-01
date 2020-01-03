@@ -37,7 +37,6 @@ if(process.env.NODE_ENV == 'production'){
 }
 
 app.use(helmet());
-
 app.use(bdpar.json());
 app.use(bdpar.urlencoded({extended:false}));
 app.use ((req, res, next)=>{
@@ -45,10 +44,14 @@ app.use ((req, res, next)=>{
     res.set({
       'Cache-Control': 'public',
     });
+    res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user";
+    res.locals.logouturl = 'https://domkie.com';
   } else {
     res.set({
       'Cache-Control': 'no-cache'
     });
+    res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user";
+    res.locals.logouturl = 'http://localhost:8008';
   }
   next();
 });
@@ -56,30 +59,57 @@ app.use(cors());
 
 var sess={
   secret: 'bokiesectcat',
-  cookie:{path: '/creator', sameSite: 'lax'},
+  cookie:{path: '/', sameSite: 'lax'},
   resave: false,
   saveUninitialized: true,
-  name: 'Domkie Creator',
+  //name: 'Domkie Creator',
   store: new memstore({
-    checkPeriod: 86400000
+    //checkPeriod: 86400000,
+    ttl: 43200000
   })
 }
 if(process.env.NODE_ENV != 'production'){
   app.use(morgan('combined'));
 }else {
-  app.set('trust proxy', 1);
   sess.cookie.secure = true;
   port = process.env.PORT || 5500;
 }
-
-app.use('/book', bookroute);
-app.use(exsession(sess))
-app.use('/creator', (req, res, next)=>{
-  res.set({
-    'Cache-Control': 'private'
-  })
+app.use(exsession(sess));
+app.use((req, res, next)=>{
+  //applog('Request going through here');
+  //applog(req.session.id);
+  if(!req.session.domkie){
+    req.session.domkie = {
+      loggedin: false,
+      acccode: null,
+      refcode: null,
+      userinfo: null
+    };
+    res.locals.loggedin = false;
+  } else {
+    //applog(JSON.stringify(req.session.domkie));
+    //FIX THIS
+    //{"loggedin":true,"authcode":"ca733154-08e0-41d0-b7aa-228a5a81aad2","userinfo":null}
+    if(req.session.domkie.loggedin && req.session.domkie.userinfo){
+      //display banner
+      res.locals.loggedin = req.session.domkie.loggedin;
+      //display user name on homepage
+      res.locals.username = req.session.domkie.userinfo.name;
+      //url return to userhub on homepage
+      res.locals.userurl = req.protocol + '://' + req.get('host') + '/creator/user';
+    } /* else if(req.session.domkie.loggedin){
+      
+    } */ else if(!req.session.domkie.loggedin && req.query.code){ //code u just return from amazon log in screen
+      //set this to use in creator banner ejs
+      res.locals.loggedin = true; 
+      res.locals.username = null;
+    } else {
+      res.locals.loggedin = false;
+    }
+  }
   next();
-} ,creatorroute);
+});
+
 
 app.get('/', (req, res)=>{
   (async function(){
@@ -107,9 +137,10 @@ app.get('/', (req, res)=>{
     try{
       var mandata = await newman;
       var comdata = await newcom;
+
       ejs.renderFile('./views/partials/homepage.ejs', {mangadata: mandata, comicdata: comdata})
-        .then(str =>{res.render('index', {page: str})})
-        .catch(err =>{ apperr('erro while rendering homepage ' + err)})
+        .then(str =>{res.render('index', {page: str});})
+        .catch(err =>{ apperr('error: rendering homepage ' + err);});
     }catch (err){
       apperr('err while try to await to get new books ' + err);
       res.redirect('/500'); 
@@ -127,7 +158,23 @@ app.get('/500', (req, res)=>{
 app.get('/ads.txt', (req, res)=>{
   res.setHeader('Content-Type', 'text/plain');
   res.sendFile(__dirname + '/ads.txt');
-})
+});
+
+app.use('/book', (req, res, next)=>{
+  //applog(req.session.login);
+  next();
+}, bookroute);
+
+app.use('/creator', (req, res, next)=>{
+  res.set({
+    'Cache-Control': 'no-cache'
+  });
+  //applog(req.session.login);
+  res.locals.logurl = null;
+  next();
+} ,creatorroute);
+
+
 app.listen(port, '127.0.0.1', (err)=>{
   if(err){
     apperr('Server has an error ' + err);

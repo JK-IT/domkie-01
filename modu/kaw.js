@@ -389,7 +389,7 @@ kaw.GetUserAtt = function(acctok){
   return new Promise((resolve, reject)=>{
     cogservice.getUser(par, (err, data)=>{
       if(err){
-        errorcogservice('getting error while getting user attribute '+ err);
+        errorcogservice('ERROR-GET USER ATTRIBUTE '+ err);
         reject(err);
       } else {
         //logcogservice(data);
@@ -411,7 +411,7 @@ kaw.GetUserFolder = function(prefix){
         des3err('error - get user folder ' + err);
         reject(err);
       } else {
-        des3(data);
+        //des3(data);
         resolve(data);
       }
     })
@@ -447,21 +447,41 @@ kaw.GetBlobText = function(bucket, key){
   
 }
 
-kaw.DeleteObjs = function(bucket, key){
-  let par = {
-    Bucket: bucket,
-    Key: key
-  }
+kaw.DeleteObjs = function(bucket, prefix){
   return new Promise((resolve, reject)=>{
-    s3.deleteObject(par, (err, data)=>{
+    let listpar = {
+      Bucket: bucket,
+      Prefix: prefix
+    }
+    s3.listObjectsV2(listpar, (err, data)=>{
       if(err){
+        des3err('ERROR - GETTING ITEMS IN KAW.DELETEOBJS ');
         des3err(err);
-        reject(false);
       } else {
-        des3(data);
-        resolve(true);
+        //des3('GETTING USERITEMS - KAW.DELETEOBJS ');
+        //des3(data);
+        let itemarray = [];
+        for(let item of data.Contents){
+          itemarray.push({Key: item.Key});
+        }
+        s3.deleteObjects({
+          Bucket: bucket,
+          Delete: {Objects: itemarray}
+        }, (err, opresult)=>{
+          if(err){
+            des3err('KAW.DELETEOBJS: ERROR DELETING OBJECTS');
+            des3err(err);
+            reject(false);
+          } else {
+            des3('KAW.DELETEOBJS: DELETE SUCCESS ');
+            //des3(opresult);
+            resolve(true);
+          }
+        })
       }
     })
+    
+    
   })
 }
 

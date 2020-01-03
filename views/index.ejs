@@ -4,7 +4,7 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Domkie</title>
@@ -16,7 +16,7 @@
   <script type="module" src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule="" src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons/ionicons.js"></script>
   <!-- inject:css -->
-    <link rel="stylesheet" href="/css/main-6f10f26066.min.css">
+    <link rel="stylesheet" href="/css/main-be6da0b99d.min.css">
     <!-- endinject -->
 </head>
   <body>
@@ -24,7 +24,9 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
     <%- include('./partials/headbar.ejs')%>
-    
+      <%if(typeof showBanner == 'undefined'){%>
+    <%- include('./partials/creator-banner.ejs')%>
+      <%}%>
     <%- page%>
     
     <br>
@@ -41,7 +43,7 @@
     </script>
     <%- include('./partials/footer.ejs')%>
     <!-- inject:js -->
-      <script async defer type="text/javascript" src="/js/main-3d6688a774.js"></script>
+      <script async defer type="text/javascript" src="/js/main-c748735d59.js"></script>
       <!-- endinject -->
     <script async defer src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
   </body>

@@ -39,8 +39,7 @@
     "helmet": "^3.21.1",
     "memory-cache": "^0.2.0",
     "memorystore": "^1.6.1",
-    "passport": "^0.4.0",
-    "passport-auth0": "^1.2.1",
+    "node-fetch": "^2.6.0",
     "querystring": "^0.2.0",
     "request": "^2.88.0"
   },

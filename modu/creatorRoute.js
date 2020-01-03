@@ -1,16 +1,17 @@
-const exp = require('express');
-const creator = exp.Router();
-const ejs = require('ejs');
-const debug = require('./debug');
-const kaw = require('./kaw');
-const util = require('util');
-const crypto = require('crypto-js');
+var exp = require('express');
+var creator = exp.Router();
+var ejs = require('ejs');
+var debug = require('./debug');
+var kaw = require('./kaw');
+var util = require('util');
+var crypto = require('crypto-js');
 
-const reqmodule = require('request');
-const querystring = require('querystring')
+var reqmodule = require('request');
+var querystring = require('querystring');
+var fetch = require('node-fetch');
 
-let log = debug.extend('creator-log');
-let errlog = debug.extend('creator-err');
+var creatorLog = debug.extend('creator-log');
+var errlog = debug.extend('creator-err');
 
 var loginurl = null;
 var cburl = null;
@@ -18,23 +19,28 @@ var logouturl = null;
 
 if(process.env.NODE_ENV == 'production'){
   
-  cburl = 'https://domkie.com/creator/user'
-  logouturl = 'https://domkie.com/creator'
-  loginurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user"
+  cburl = 'https://domkie.com/creator/user';
+  logouturl = 'https://domkie.com';
+  loginurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user";
 } else {
-  cburl = 'http://localhost:8008/creator/user'
-  logouturl = 'http://localhost:8008/creator'
-  loginurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user"
+  cburl = 'http://localhost:8008/creator/user';
+  logouturl = 'http://localhost:8008';
+  loginurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user";
 }
-
+creator.use((req, res, next)=>{
+  //set up show banner so it will not show if in this page
+  res.locals.showBanner = false;
+  //creatorLog('REQ SESSION IN CREATOR ROUTE ' + JSON.stringify(req.session.domkie));
+  next();
+});
 
 creator.get('/',(req, res, next)=>{
-  log('creator root path ' + req.session);
+  creatorLog('creator root path ' + req.session);
   if(req.session.loggedin){
     if(req.session.loggedin == false || req.session.loggedin == undefined){
       next();
     } else {
-      log('USER ALREADY LOGGED IN');
+      creatorLog('USER ALREADY LOGGED IN');
       res.redirect('/creator/user');
     }
   } else {
@@ -49,8 +55,8 @@ creator.get('/',(req, res, next)=>{
     .catch(err =>{
       errlog(err);
       res.redirect(req.protocol + '://' + req.get('host') + '/500');
-    })
-})
+    });
+});
 
 //get callback req, if code is granted, set up session, else return to login page
 /* creator.get('/callback', (req, res, next)=>{
@@ -62,130 +68,163 @@ creator.get('/',(req, res, next)=>{
   res.redirect('/creator/user');
 }) */
 
-creator.get('/user', (req, res, next)=>{
-  log('req session ' + req.session);
-  res.set({
-    'Cache-Control': 'no-cache'
-  })
-  next();
-} ,(req, res, next)=>{
+creator.get('/user',(req, res, next)=>{
   
-  if(req.session.userinfo != null || req.session.userinfo != undefined){
-    //log('user session exist ' + (req.header('x-forwarded-for') || req.connection.remoteAddress));
+  if(req.session.domkie.loggedin && req.session.domkie.userinfo){
+    //creatorLog('user session exist ' + (req.header('x-forwarded-for') || req.connection.remoteAddress));
     //caling aws s3 to get items from server if user have it
-    var prefix = req.session.userinfo.sub + '/listing/';
-    //log(prefix);
+    var prefix = req.session.domkie.userinfo.sub + '/listing/';
+    //creatorLog(prefix);
     kaw.GetUserFolder(prefix)
       .then(useritems=>{
-        //log('user items ' + useritems);
-        DisplayUserPage('creator-user.ejs', useritems.Contents, req.session.userinfo, res, req);
+        //creatorLog('user items ' + useritems);
+        DisplayUserPage('creator-user.ejs', useritems.Contents, req.session.domkie.userinfo, res, req);
       })
       .catch(err =>{
         res.redirect(req.protocol + '://' + req.get('host') + '/500');
-      })
-  } else {
-      //using auth code to get access token to get user info
-    //log(req.session.authcode);
-    //log('user session doesn"t exist');
-    req.session.loggedin = true;
-    req.session.authcode = req.query.code;
+      });
+  } 
+  else if(req.session.domkie.loggedin && !req.session.domkie.userinfo && req.session.domkie.acccode){
+    kaw.GetUserAtt(req.session.domkie.acccode)
+    .then(useratt=>{
+      var userinfo = {};
+      //userinfo.id = (JSON.parse(body)).id_token;
+      userinfo.poolid = process.env.pool_id;
+      useratt.UserAttributes.forEach((item, idx)=>{
+        if(item.Name == 'sub'){
+          userinfo.sub = item.Value;
+        }
+        if(item.Name == 'phone_number'){
+          userinfo.phoneNumber = item.Value;
+        }
+        if(item.Name == 'name'){
+          userinfo.name = item.Value;
+        }
+        if(item.Name == 'email'){
+          userinfo.email = item.Value;
+        }
+        if(item.Name == 'email_verified'){
+          userinfo.verified = item.Value;
+        }
+      });
+      req.session.domkie.userinfo = userinfo; //save to session
+      var prefix = userinfo.sub + '/listing/';
+      return kaw.GetUserFolder(prefix);
+    })
+    .then(userfolder=>{
+      //creatorLog('USER FOLDER '+ util.inspect(userfolder, true, 2, true));
+      DisplayUserPage('creator-user.ejs', userfolder.Contents, req.session.domkie.userinfo, res, req);
+    })
+    .catch(error=>{
+      errlog('GET /USER ERROR '  + error);
+      res.redirect(loginurl);
+    });
+  }
+  else {
+      //using auth code from url to get access token to get user info
+    //creatorLog('AUTH CODE ' + req.query.code);
     var form ={
       grant_type: 'authorization_code',
       client_id: process.env.pool_client_id,
       redirect_uri: cburl,
       code: req.query.code //req.session.authcode
-    } 
-    var formdata = querystring.stringify(form);
-    reqmodule.post({
-      headers:{
+    }; 
+    let tokenurl  = 'https://domkie.auth.us-west-2.amazoncognito.com/oauth2/token?' + querystring.stringify(form);
+    fetch(tokenurl, {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
         //use this if u have client secret
-        //'Authorization': 'Basic 3bpnd386ku67jlgbftpmo79c12'
-      },
-      url: 'https://domkie.auth.us-west-2.amazoncognito.com/oauth2/token',
-      body: formdata
-    }, (err, response, body)=>{
-      if(err || (JSON.parse(body)).error){
-        errlog('error while getting token ' + err + '-' + (JSON.parse(body)).error);
-        //make them log in again
-        res.redirect(loginurl)
-      } else {
-        //log(JSON.parse(body));
-        var acc_token = (JSON.parse(body)).access_token;
-        req.session.refcode = (JSON.parse(body)).refresh_token;
-        req.session.idtok = (JSON.parse(body)).id_token;
-
-        //getting user attribute
-        //this is the way to get user info using SDK FOR AWS
-        kaw.GetUserAtt(acc_token)
-        .then(useratt =>{
-          var userinfo = {};
-          
-          //userinfo.id = (JSON.parse(body)).id_token;
-          userinfo.poolid = process.env.pool_id;
-          useratt.UserAttributes.forEach((item, idx)=>{
-            if(item.Name == 'sub'){
-              userinfo.sub = item.Value;
-            }
-            if(item.Name == 'phone_number'){
-              userinfo.phoneNumber = item.Value;
-            }
-            if(item.Name == 'name'){
-              userinfo.name = item.Value;
-            }
-            if(item.Name == 'email'){
-              userinfo.email = item.Value;
-            }
-            if(item.Name == 'email_verified'){
-              userinfo.verified = item.Value;
-            }
-          })
-          req.session.userinfo = userinfo; //save to session
-          var prefix = userinfo.sub + '/listing/';
-          kaw.GetUserFolder(prefix)
-          .then(userfolder =>{
-            //log('USER FOLDER '+ util.inspect(userfolder, true, 2, true));
-            DisplayUserPage('creator-user.ejs', userfolder.Contents, userinfo, res, req);
-          })
-          .catch(err =>{
-            res.redirect(req.protocol + '://' + req.get('host') + '/500');
-          });
-        })
-        .catch(err =>{
-          res.statusCode = 500;
-          res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        });
+        //'Authorization': 'Basic 3bpnd386ku67jlgbftpmo79c12' = 'Basic BASE64(CLIENT_ID:CLIENT_SECRET)'
+        //u need to convert base64-clientid:clientsecret to base64 as above
       }
+    })
+    .then(postresp => {
+      return postresp.json();
+    })
+    .then(tokensjson=>{
+      //creatorLog('TOKEN RESPONSE ' + JSON.stringify(tokensjson));
+      var acc_token = /* (JSON.parse(tokensjson)) */tokensjson.access_token;
+      //creatorLog(acc_token);
+      req.session.domkie.loggedin = true;
+      req.session.domkie.acccode = acc_token;
+      req.session.domkie.refcode = /* (JSON.parse(tokensjson)) */tokensjson.refresh_token;
+      req.session.domkie.idtok = /* (JSON.parse(tokensjson)) */tokensjson.id_token;
+      return acc_token;
+    })
+    .then(acctoken =>{
+      //getting user attribute
+      //this is the way to get user info using SDK FOR AWS
+      return kaw.GetUserAtt(acctoken);})
+    .then(useratt =>{
+      var userinfo = {};
+      //userinfo.id = (JSON.parse(body)).id_token;
+      userinfo.poolid = process.env.pool_id;
+      useratt.UserAttributes.forEach((item, idx)=>{
+        if(item.Name == 'sub'){
+          userinfo.sub = item.Value;
+        }
+        if(item.Name == 'phone_number'){
+          userinfo.phoneNumber = item.Value;
+        }
+        if(item.Name == 'name'){
+          userinfo.name = item.Value;
+        }
+        if(item.Name == 'email'){
+          userinfo.email = item.Value;
+        }
+        if(item.Name == 'email_verified'){
+          userinfo.verified = item.Value;
+        }
+      });
+      req.session.domkie.userinfo = userinfo; //save to session
+      var prefix = userinfo.sub + '/listing/';
+      return kaw.GetUserFolder(prefix);
+    })
+    .then(userfolder=>{
+      //creatorLog('USER FOLDER '+ util.inspect(userfolder, true, 2, true));
+      DisplayUserPage('creator-user.ejs', userfolder.Contents, req.session.domkie.userinfo, res, req);
+    })
+    .catch(error=>{
+      errlog('GET /USER ERROR '  + error);
+      res.redirect(loginurl);
     });
   }
 });
 
 creator.get('/logout', (req, res)=>{
   
-  req.session.loggedin = false;
+  /* req.session.domkie.loggedin = false;
   //req.session.refresh = null;
-  req.session.authcode = null;
-  req.session.refcode = null;
-  req.session.userinfo = null;
-  
-  var questr = {
-    client_id: process.env.pool_client_id,
-    logout_uri: logouturl
-  }
-  reqmodule.get('https://domkie.auth.us-west-2.amazoncognito.com/oauth/logout', {
-    body: querystring.stringify(questr)
-  }, (err, response, body)=>{
-    if(err){
-      errlog(err);
+  req.session.domkie.acccode = null;
+  req.session.domkie.refcode = null;
+  req.session.domkie.userinfo = null;
+  req.session.domkie.idtok = null; */
+  req.session.destroy((err)=>{
+    if (err){
+      errlog('LOG OUT ERROR: SESSION DESTROY ' + err);
       res.redirect(req.protocol + '://' + req.get('host') + '/500');
-    }else {
-      log('Successfull logout from cognito');
-      //log(body);
-      res.redirect('/creator')
+    } else {
+      var questr = {
+        client_id: process.env.pool_client_id,
+        logout_uri: logouturl
+      };
+      reqmodule.get('https://domkie.auth.us-west-2.amazoncognito.com/oauth/logout', {
+        body: querystring.stringify(questr)
+      }, (err, response, body)=>{
+        if(err){
+          errlog('LOG OUT ERROR: AWS LOGOUT ENDPOINT '  + err);
+          res.redirect(req.protocol + '://' + req.get('host') + '/500');
+        }else {
+          creatorLog('Successfull logout from cognito');
+          //creatorLog(body);
+          //creatorLog('return url ' + req.protocol + '://' + req.get('host'));
+          res.redirect(req.protocol + '://' + req.get('host'));
+        }
+      });
     }
-  })
-  //res.redirect('/creator')
-})
+  });
+});
 
 //fetch with post to this api -- creator/user/upload
 creator.get('/user/upload', (req, res)=>{
@@ -223,7 +262,7 @@ creator.get('/user/upload', (req, res)=>{
 
   var signature = crypto.HmacSHA256(b64policy, ksign);
   var hexsig = signature.toString(crypto.enc.Hex);
-  log(hexsig);
+  creatorLog(hexsig);
   res.set({
     'Content-Type': 'application/json'
   })
@@ -253,7 +292,7 @@ creator.get('/user/getitems', (req, res)=>{
             res.end(JSON.stringify({str: str}))
           })
           .catch(err=>{
-            log(err);
+            creatorLog(err);
             res.status(500);
             res.end();
           })
@@ -262,7 +301,7 @@ creator.get('/user/getitems', (req, res)=>{
         if(err == null){
           res.end(JSON.stringify({str: null}))
         } else {
-          log('catching err when fetching the item ' + err);
+          creatorLog('catching err when fetching the item ' + err);
         }
       })
   })
@@ -270,10 +309,11 @@ creator.get('/user/getitems', (req, res)=>{
 
 //browser: fetch to delete objects
 creator.get('/user/deleteobj', (req, res)=>{
-  let subuser = req.query.subuser;
+  let subuser = req.query.usersub;
   let item = req.query.itemname;
-  let key = subuser + '/listing/' + item;
-  kaw.DeleteObjs('dom-upload', key)
+  let prefix = subuser + '/listing/' + item + '/' ;
+  creatorLog('prefix to delete ' + prefix);
+  kaw.DeleteObjs('dom-upload', prefix)
   .then(delres=>{
     if(delres){ //delres = true
       res.set('Content-Type', 'application/json');
@@ -313,13 +353,13 @@ function GetItemListImg(inarr, inlev){
           let objname = keyobj.Key.split('/').pop();
           let ext = objname.split('.');
           if(ext.length == 1 || ext.indexOf('txt') != -1){
-            log(ext);
+            //creatorLog(ext);
             
             if((keyobj.Key.split('/').pop()[0]).match(/email/ig)){
-              log('found email');
+              //creatorLog('found email');
               obj.description.email = keyobj.Key;
             } else {
-              log('found freckle');
+              //creatorLog('found freckle');
               obj.description.description = keyobj.Key;
             }
           } else {
@@ -328,14 +368,14 @@ function GetItemListImg(inarr, inlev){
         } else {
           let objname = keyobj.Key.split('/').pop();
           let ext = objname.split('.');
-          //log(ext);
+          //creatorLog(ext);
           if(ext.length == 1 || ext.indexOf('txt') != -1){
             
             if(ext[0].match(/(^email)./ig)){
-              //log('found email');
+              //creatorLog('found email');
               obj.description.email = keyobj.Key;
             } else {
-              //log('found freckle');
+              //creatorLog('found freckle');
               obj.description.description = keyobj.Key;
             }
           } else {
@@ -364,19 +404,19 @@ function GetItemListImg(inarr, inlev){
 function DisplayUserPage(userpage, userfolderarray, userinfo, res, req){
   GetItemListImg(userfolderarray, 2)
     .then(outfolder=>{
-      //log('OUT USER FOLDER LIST ' + util.inspect(outfolder, true, 2, true));
+      //creatorLog('OUT USER FOLDER LIST ' + util.inspect(outfolder, true, 2, true));
       ejs.renderFile('views/partials/' + userpage, {user: userinfo, listing: outfolder})
         .then(str =>{
-          res.render('index', {page: str})
+          res.render('index', {page: str});
         })
-        .catch(err=>{
+        /* .catch(err=>{
           errlog(err);
           res.redirect(req.protocol + '://' + req.get('host') + '/500');
-        });
+        }); */
       
     })
     .catch(err =>{
-      log('error getting image array ' + err);
+      creatorLog('ERROR ' + err);
       if(err == null){
         ejs.renderFile('views/partials/creator-user.ejs', {user: userinfo, listing: null})
         .then(str =>{
@@ -393,7 +433,7 @@ function DisplayUserPage(userpage, userfolderarray, userinfo, res, req){
 function securelogIn(req, res, next){
   if(req.session.loggedin == false || req.session.loggedin == undefined){
     errlog('COULD NOT FOUND THE SESSION COOKIE OR CACHING')
-    //make them log in again
+    //make them creatorLog in again
     res.redirect(loginurl)
   } else {
     next();
@@ -432,11 +472,11 @@ var questr = {
         }, function(err, response, body){
           if(err || (JSON.parse(body)).error){
             errlog('error while getting user info ' + err + '-' + (JSON.parse(body)).error);
-            //make them log in again
+            //make them creatorLog in again
             res.redirect(loginurl)
           } else {
             var userinfo = JSON.parse(body);
-            log(userinfo);
+            creatorLog(userinfo);
             req.session.userinfo = userinfo;
             ejs.renderFile('views/partials/creator-user.ejs', {user: userinfo})
             .then(str =>{
@@ -451,10 +491,10 @@ var questr = {
 
 /*
   if(ext.length == 1 || ext.indexOf('txt') != -1){
-    log('found freckle');
+    creatorLog('found freckle');
     //getting data from blob
     var strdata = await kaw.GetBlobText('dom-upload', keyobj.Key)
-    log('blob data ' + strdata);
+    creatorLog('blob data ' + strdata);
     obj.description = JSON.parse(strdata);
     
   }

@@ -18,7 +18,7 @@ if(listing != null){ %>
       </div>
     </div>
     <!--Edit part-->
-    <div>
+    <div style="display: none;">
       <form class="upload-form" name="editForm" autocomplete="on">
         <div>
           <label for="email">Email: </label>
@@ -36,7 +36,7 @@ if(listing != null){ %>
     </div>
     <!--edit part-->
     <div class="button-group">
-      <button class="delete-butt" onclick="DeleteObjects(event, '<%= user.sub%>', '<%= item.name%>')">Delete</button>
+      <button class="delete-butt" onclick="DeleteObjects(event, '<%= usersub%>', '<%= item.name%>')">Delete</button>
       <button class="edit-butt" onclick="EditListing(event, '<%= usersub%>', '<%= item.name%>')">Edit</button>
       <span class="err-span hidden" ></span>
     </div>

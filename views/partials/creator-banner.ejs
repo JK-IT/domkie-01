@@ -1,0 +1,49 @@
+<section class="mar-create-sec">
+  <div class="page-introduction">
+    <%if(!loggedin){%>
+    <div class='creator-banner'>
+      <p>Are you a Cartoonist, a Comic Artist, or a writer/creator? Would you like to build your audience and connect to readers all around the world?</p>
+      <div>
+        <button><a href="<%= logurl%>" style="color: white;">Join Us Now/Log In</a></button>
+      </div>
+      <%}else if(username){%>
+        <p>Welcome Back, <%= username%></p>
+        <button><a href="<%= userurl%>" style="color: white;">Go To Your Hub</a></button>
+      <%}%>
+    </div>
+    
+    
+  </div>
+<!--  <div class="form-group">
+    <form autocomplete="off" name="loginForm">
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email">
+      <span class="err-span" id="loginEmailSpan"></span>
+
+      <label for="password">Password:</label>
+      <input type="password" name="password" id="pwlogin">
+      <span class="err-span" id="loginPwSpan"></span>
+      
+      <input type="button" onclick="Login(event)" value="Log In"></in>
+    </form>
+    
+    <form autocomplete="off" name="signupForm">
+      <label for="userName">Username:</label>
+      <input type="text" name="username" id="username">
+
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email">
+      <span class="err-span" id='signupEmailSpan'></span>
+
+      <label for="pw">Password:</label>
+      <input type="password" name="pw" id="pwsignup">
+      <span class="err-span" id="signupPwSpan"></span>
+
+      <label for="repw">Re-enter Password:</label>
+      <input type="password" name="repw" id="repwsignup">
+      <span class="err-span" id="signupRePwSpan"></span> 
+
+      <input type="button" onclick="Signup(event)" value="Sign Up">
+    </form>
+  </div> -->
+</section>
