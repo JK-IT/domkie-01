@@ -35,7 +35,6 @@
     "ejs": "^2.6.2",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
-    "flat-cache": "^2.0.1",
     "helmet": "^3.21.1",
     "memory-cache": "^0.2.0",
     "memorystore": "^1.6.1",

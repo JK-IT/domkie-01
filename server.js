@@ -6,6 +6,8 @@ const kaw = require('./modu/kaw');
 const ejs = require('ejs');
 const bookroute = require('./modu/bookRoute');
 const creatorroute = require('./modu/creatorRoute');
+var marketroute = require('./modu/marketRoute');
+var linkmodu = require('./modu/linkmodule');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -44,17 +46,18 @@ app.use ((req, res, next)=>{
     res.set({
       'Cache-Control': 'public',
     });
-    res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user";
-    res.locals.logouturl = 'https://domkie.com';
+    res.locals.logurl = linkmodu.productlinks.loginurl;
+    res.locals.logouturl = linkmodu.productlinks.logouturl;
   } else {
     res.set({
       'Cache-Control': 'no-cache'
     });
-    res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user";
-    res.locals.logouturl = 'http://localhost:8008';
+    res.locals.logurl = linkmodu.devlinks.loginurl;
+    res.locals.logouturl = linkmodu.devlinks.logouturl;
   }
   next();
 });
+
 app.use(cors());
 
 var sess={
@@ -111,6 +114,22 @@ app.use((req, res, next)=>{
 });
 
 
+app.use('/book', (req, res, next)=>{
+  //applog(req.session.login);
+  next();
+}, bookroute);
+
+app.use('/creator', (req, res, next)=>{
+  res.set({
+    'Cache-Control': 'no-cache'
+  });
+  //applog(req.session.login);
+  //res.locals.logurl = null;
+  next();
+} ,creatorroute);
+
+app.use('/market', marketroute);
+
 app.get('/', (req, res)=>{
   (async function(){
     var newman = function(){
@@ -159,20 +178,6 @@ app.get('/ads.txt', (req, res)=>{
   res.setHeader('Content-Type', 'text/plain');
   res.sendFile(__dirname + '/ads.txt');
 });
-
-app.use('/book', (req, res, next)=>{
-  //applog(req.session.login);
-  next();
-}, bookroute);
-
-app.use('/creator', (req, res, next)=>{
-  res.set({
-    'Cache-Control': 'no-cache'
-  });
-  //applog(req.session.login);
-  res.locals.logurl = null;
-  next();
-} ,creatorroute);
 
 
 app.listen(port, '127.0.0.1', (err)=>{

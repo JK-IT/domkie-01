@@ -5,7 +5,12 @@
 
   <div id='naviLink'>
     <span><a href="/"><ion-icon name='home'></ion-icon></a></span> 
-    <span><a href="/market"><ion-icon name='cart'></ion-icon></a></span> 
-    <!--<span><a href='/creator'><ion-icon name='nutrition'></ion-icon></a></span>--> 
+    <span><a href="/market"><ion-icon name='cart'></ion-icon></a></span>
+    <%if (!loggedin){%>
+    <span><a href="<%= logurl%>"><ion-icon name='log-in'></ion-icon></a></span> 
+    <%} else {%>
+    <span><a href="<%= logouturl%>"><ion-icon name='log-out'></ion-icon></a></span> 
+    <%}%>
+    <!--<span><a href='/creator'><ion-icon name='nutrition'></ion-icon></a></span><a </span>>--> 
   </div>
 </div>

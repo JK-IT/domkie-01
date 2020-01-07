@@ -1,0 +1,317 @@
+@mixin  reuse-button {
+  color: white;
+  margin: auto;
+  padding: 0.3%;
+  cursor: pointer;
+  
+  border: none;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+@mixin reuse-butt-group {
+  max-width: 50vw;
+  margin: auto;
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
+  align-items: center;
+}
+
+.mar-create-sec{
+  max-height: 30vw;
+}
+
+.page-introduction{
+  text-align: center;
+  margin:auto;
+  //margin-top: 3vh;
+  //padding-top: 2vh;
+  width: 100vw;
+  margin-bottom: 20px;
+  .creator-banner{
+    width: 90vw;
+    height: 20vw;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    box-shadow: 2px 2px 10px black;
+    //background-image: url('../img/creatorhub-cover.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 10px;
+  }
+  
+  div{
+    width: 90%;
+    margin: auto;
+    p{
+      display: inline-block;
+      clear: both;
+      //border: thick double black;
+      padding: 10px;
+      //width: 80%;
+      margin-top: 20px;
+      /* border-radius: 5px;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      -ms-border-radius: 5px;
+      -o-border-radius: 5px; */
+    }
+  }
+  button{
+    background-color: rgb(6, 73, 219);
+    outline: none;
+    border: none;
+    padding: 5px;
+    margin-top: 10px;
+    padding-right: 8px;
+    padding-left: 8px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+}
+
+.for-sale{
+  width: 90vw;
+  margin-top: 20px;
+  margin:auto;
+}
+.user-book, .listing-div{
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  h1, h2, h3, h4, h5{
+    width: 90%;
+    margin: auto;
+    padding-top: 20px;
+  }
+  h5{
+    max-width: 10vw;
+    background-color: slateblue;
+    display: inline-block;
+    text-align: center;
+    color:whitesmoke;
+  }
+  p{
+    //padding-top: 10px;
+    padding-bottom: 10px;
+    width: 90%;
+    margin:auto;
+  }
+}
+
+.listing-div{
+  width: 100%;
+  box-shadow: 0px -1px 10px black;
+}
+
+.form-group{
+  width: 90vw;
+  margin: auto;
+  display: none;
+  visibility: hidden;
+  form {
+    margin:auto;
+    margin-top: 5vh;
+    box-shadow: inset 0px 0px 5px black;
+    padding: 20px;
+    label{
+      display: block;
+      margin: auto;
+      margin-top: 5px;
+    }
+    input{
+      border-style: none;
+      border-bottom: solid 1px black;
+      width: 90%;
+      display: block;
+      margin-left: 0;
+    }
+    input[type=button]{
+      border-style: none;
+      background-color: rgb(54, 209, 162);
+      margin: auto;
+      margin-top: 30px;
+      color: white;
+      width: 20%;
+      box-shadow: 5px 5px 8px -6px black;
+      cursor: pointer;
+      border-radius: 10px;
+      -webkit-border-radius: 10px;
+      -moz-border-radius: 10px;
+      -ms-border-radius: 10px;
+      -o-border-radius: 10px;
+    }
+  }
+}
+
+.user-headbar {
+  width: 100vw;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-content: center;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  box-shadow: 0px 5px 10px gray;
+  .user-avata{
+    padding: 5px;
+    flex: 1;
+    img{
+      width: 90%;
+      height: auto;
+    }
+  }
+
+  .user-function{
+    flex: 2;
+    text-align: center;
+    button{
+      @extend %gene-button;
+      margin: 10px;
+    }
+
+    button{
+      transition: background-color .8s ease-in-out;
+      -webkit-transition: background-color .8s ease-in-out;
+      -moz-transition: background-color .8s ease-in-out;
+      -ms-transition: background-color .8s ease-in-out;
+      -o-transition: background-color .8s ease-in-out;
+}
+
+    button:hover{
+      background-color: rgb(189, 37, 62);
+    }
+  }
+}
+
+#uploadListingForm, .upload-form {
+  padding: 3%;
+  div{
+    width: 90%;
+    display: block;
+    margin: auto;
+    margin-bottom: 3%;
+  }
+  label{
+    text-align: center;
+    display: block;
+    margin: auto;
+    margin-bottom: 1%;
+  }
+  input{
+    display: block;
+    width: 50%;
+    outline: none;
+    border:none;
+    border-bottom: 1px solid black;
+    line-height: 1em;
+    margin: auto;
+  }
+  input[type=file]{
+    border-bottom: none;
+  }
+  input[type=button]{
+    @include reuse-button;
+    background-color: rgb(45, 142, 187);
+  }
+  input[type=button]:hover{
+    background-color: rgb(18, 113, 156);
+    transition: background-color 1s ease;
+    -webkit-transition: background-color 1s ease;
+    -moz-transition: background-color 1s ease;
+    -ms-transition: background-color 1s ease;
+    -o-transition: background-color 1s ease;
+  }
+  textarea{
+    outline: none;
+    margin-left: auto;
+    margin-right: auto;
+    border: none;
+    border-bottom: 1px solid black;
+    display: block;
+  }
+  textarea, input{
+    text-align: center;
+  }
+}
+
+#listing{
+  width: 100vw;
+  padding-top: 10px;
+}
+
+.item-container{
+  width: 100vw;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  div{
+    width: 100%;
+  }
+  .items{
+    h3{
+      text-align: center;
+    }
+    width: 90%;
+    height: auto;
+    margin: auto;
+    
+  }
+}
+.button-group{
+  @include reuse-butt-group;
+  flex-flow: row nowrap;
+  padding-bottom: 0.5vw;
+  padding-top: 0.5vw;
+  button{
+    @include reuse-button;
+    background-color: rgb(72, 235, 121);
+    margin: auto;
+    flex: 1;
+    max-width: 20vw;
+  }
+}
+
+.delete-butt{
+  background-color: rgb(240, 83, 130) !important;
+}
+
+.img-listing-container{
+  max-width: 70%;
+  margin: auto;
+  overflow-x: auto;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content:flex-start;
+  align-items: center;
+  img{
+    flex: 0 0 auto;
+    height: 12vw;
+    margin: auto;
+    margin-top: 1vw;
+    margin-bottom: 1vw;
+    padding-left: 1%;
+    padding-right: 1%;
+  }
+  background-color: rgba(202, 202, 202, 0.212);
+  
+}
+
+.item-description{
+  width: 80%;
+  margin: auto;
+  p{
+    font-size: 0.9em;
+    text-align: center;
+  }
+}

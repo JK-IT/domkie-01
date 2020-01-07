@@ -1,0 +1,39 @@
+%border-bottom-only{
+  border: none;
+  border-bottom: solid 1px;
+}
+
+%button-decor{
+  margin: auto;
+  outline: none;
+  border-radius: 10px;
+  -webkit-border-radius: 10px    ;
+  -moz-border-radius: 10px    ;
+  -ms-border-radius: 10px    ;
+  -o-border-radius: 10px    ;
+  border-color: transparent;
+  cursor: pointer;
+}
+
+%gene-button{
+  @extend %button-decor;
+  background-color: rgb(63, 155, 98);
+  padding: 3px;
+  padding-left: 8px;
+  padding-right: 8px;
+  color: whitesmoke;
+}
+
+.err-span{
+  color: brown;
+  text-align: center;
+  font-size: 0.6em;
+  margin: auto;
+  display: block;
+}
+
+.hidden{
+  display: absolute !important;
+  top: -9999px !important;
+  left:-9999px !important;
+}

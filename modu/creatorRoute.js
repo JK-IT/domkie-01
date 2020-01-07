@@ -9,23 +9,17 @@ var crypto = require('crypto-js');
 var reqmodule = require('request');
 var querystring = require('querystring');
 var fetch = require('node-fetch');
-
+var linksmodu = require('./linkmodule');
+var link = {};
 var creatorLog = debug.extend('creator-log');
 var errlog = debug.extend('creator-err');
 
-var loginurl = null;
-var cburl = null;
-var logouturl = null;
 
 if(process.env.NODE_ENV == 'production'){
+  link = linksmodu.productlinks;
   
-  cburl = 'https://domkie.com/creator/user';
-  logouturl = 'https://domkie.com';
-  loginurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user";
 } else {
-  cburl = 'http://localhost:8008/creator/user';
-  logouturl = 'http://localhost:8008';
-  loginurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user";
+ link = linksmodu.devlinks;
 }
 creator.use((req, res, next)=>{
   //set up show banner so it will not show if in this page
@@ -48,7 +42,7 @@ creator.get('/',(req, res, next)=>{
   }
   
 } ,(req, res, next)=>{
-  ejs.renderFile('views/partials/creator-intro.ejs', {logurl: loginurl})
+  ejs.renderFile('views/partials/creator-intro.ejs', {logurl: link.loginurl})
     .then(str =>{
       res.render('index', {page: str})
     })
@@ -117,7 +111,7 @@ creator.get('/user',(req, res, next)=>{
     })
     .catch(error=>{
       errlog('GET /USER ERROR '  + error);
-      res.redirect(loginurl);
+      res.redirect(link.loginurl);
     });
   }
   else {
@@ -126,7 +120,7 @@ creator.get('/user',(req, res, next)=>{
     var form ={
       grant_type: 'authorization_code',
       client_id: process.env.pool_client_id,
-      redirect_uri: cburl,
+      redirect_uri: link.cburl,
       code: req.query.code //req.session.authcode
     }; 
     let tokenurl  = 'https://domkie.auth.us-west-2.amazoncognito.com/oauth2/token?' + querystring.stringify(form);
@@ -187,7 +181,7 @@ creator.get('/user',(req, res, next)=>{
     })
     .catch(error=>{
       errlog('GET /USER ERROR '  + error);
-      res.redirect(loginurl);
+      res.redirect(link.loginurl);
     });
   }
 });
@@ -207,7 +201,7 @@ creator.get('/logout', (req, res)=>{
     } else {
       var questr = {
         client_id: process.env.pool_client_id,
-        logout_uri: logouturl
+        logout_uri: link.logouturl
       };
       reqmodule.get('https://domkie.auth.us-west-2.amazoncognito.com/oauth/logout', {
         body: querystring.stringify(questr)
@@ -434,7 +428,7 @@ function securelogIn(req, res, next){
   if(req.session.loggedin == false || req.session.loggedin == undefined){
     errlog('COULD NOT FOUND THE SESSION COOKIE OR CACHING')
     //make them creatorLog in again
-    res.redirect(loginurl)
+    res.redirect(link.loginurl)
   } else {
     next();
   }
