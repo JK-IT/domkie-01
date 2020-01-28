@@ -13,7 +13,7 @@ if(process.env.NODE_ENV != 'production'){
       console.error('Error loading credentials ' + err.stack);
     }
   }) */
-  var cred = new kawaz.SharedIniFileCredentials({profile: 'readcornerAdmin'});
+  var cred = new kawaz.SharedIniFileCredentials({profile: 'domkieadmin'});
   kawaz.config.credentials = cred;
 }
 
@@ -38,13 +38,13 @@ const dynamo = new kawaz.DynamoDB({
 let dedymo = debug.extend('dynamo');
 let dedymoerr = debug.extend('dynamo-error');
 
-const searchDomain = new kawaz.CloudSearchDomain({
+/* const searchDomain = new kawaz.CloudSearchDomain({
   endpoint: "search-book-table-search-5oqcixmwgwfnxpr77sdbhirwbq.us-west-2.cloudsearch.amazonaws.com",
   apiVersion:"2013-01-01"
 })
 let searcherr = debug.extend('Search-Error');
 let searchlog = debug.extend('Search-Log')
-
+ */
 const cogiden = new kawaz.CognitoIdentity();
 let coglog = debug.extend('cognito');
 let cogerr = debug.extend('cognito-error');
@@ -66,35 +66,90 @@ if(process.env.NODE_ENV == 'production'){
 var time = ((Date.now() / 1000) - (14* 86400)).toString();
 dedymo ('time to compare : ' + time);
 
-kaw.CallNewManga = function(){
-  var para = {
-    TableName : 'book_table',
-    //ConsistentRead: true, not working on global secondary indexes
-    Limit: 9,
-    IndexName: 'type-date-index',
-    ScanIndexForward: false,
-    ReturnConsumedCapacity: 'INDEXES',
-    ExpressionAttributeNames: {/*'#d': 'date',*/ '#t': 'type'},
-    ExpressionAttributeValues: {/*':d': {'S': time}, */':ty': {'S': 'manga'}},
-    //this is for key schema, date is not in key schema
-    //KeyConditionExpression: '#t = :ty AND #d > :d',
-    KeyConditionExpression: '#t = :ty' /*AND #d >= :d'*/,
-    //FilterExpression: '#d >= :d' using gsi u don't need this
-  }
-  return new Promise((resole, reject)=>{
-    dynamo.query(para, (err, data)=>{
-      if(err){
-        dedymoerr(`Error: Call new manga ${err}`);
-        reject(err);
-      }else {
-        //dedymo(util.inspect(data, true, 4, true));
-        resole(data);
+//return ejs string rendering for updated and featured book
+kaw.HomepageManga = function(){
+  return new Promise((outresole, outreject)=>{
+    var para = {
+      TableName : 'book-table',
+      //ConsistentRead: true, not working on global secondary indexes
+      //Limit: 6,
+      //IndexName: 'type-date-index',
+      ConsistentRead: true,
+      ScanIndexForward: false,
+      ReturnConsumedCapacity: 'INDEXES',
+      ExpressionAttributeNames: {'#d': 'time', '#t': 'type'},
+      ExpressionAttributeValues: {':d': {'N': time}, ':ty': {'S': 'manga'}},
+      //this is for key schema, date is not in key schema
+      //KeyConditionExpression: '#t = :ty AND #d > :d',
+      KeyConditionExpression: '#t = :ty AND #d >= :d'
+      //FilterExpression: '#d >= :d' using gsi u don't need this
+    };
+    var updatedbook = new Promise((updateres, updatereject)=>{
+      dynamo.query(para, (err, data)=>{
+        if(err) updatereject(err);
+        else updateres(data);
+      });
+    });
+    
+    var featuredpara = {
+      TableName: 'book-table',
+      ConsistentRead: true,
+      IndexName: 'type-rating-index',
+      ReturnConsumedCapacity: 'INDEXES',
+      ProjectionExpression: "#n, rating",
+      ExpressionAttributeNames: {'#t': 'type', '#r': 'rating', '#n': 'name'},
+      ExpressionAttributeValues: {':ty':{'S': 'manga'}, ':ra': {'S': '3.5'}},
+      KeyConditionExpression: "#t = :ty AND #r > :ra"
+    }
+
+    var featuredbook = new Promise((featresolve, featreject)=>{
+      dynamo.query(featuredpara, (err, data)=>{
+        if(err) featreject(err);
+        else featresolve(data);
+      });
+    });
+    var dataobj = {};
+    updatedbook.then(data=>{
+      if(data.Count == 0){
+        var temppara = {
+          TableName: 'book-table',
+          ConsistentRead: false,
+          ReturnConsumedCapacity: 'INDEXES',
+          Limit: 5,
+          ScanIndexForward:  false, //to make it traversal in descending
+          ExpressionAttributeNames: {'#t': 'type'},
+          ExpressionAttributeValues: {':ty':{'S': 'manga'}},
+          KeyConditionExpression: "#t = :ty"
+        }
+        return new Promise((resolve, reject)=>{
+          dynamo.query(temppara, (err, backdata)=>{
+            if(err) reject(err);
+            else resolve(backdata);
+          });
+        });
+      } else {
+        return data.Items;
       }
     })
-  })
-}
+    .then(updata=>{
+      //dedymo(updata);
+      dataobj.updata = updata;
+      return featuredbook;
+    })
+    .then(featuredata =>{
+      //dedymo(upfeatdata);
+      dataobj.featbook = featuredata.Items;
+      outresole(dataobj);
+    })
+    .catch((err)=>{
+      dedymoerr('ERROR - HOMEPAGE MANGA FUNCTION ' + err);
+    });
 
-kaw.CallManga = function(startkey = null, lim = limit){
+  });
+  
+}; // END HOMEPAGE MANGA FUNCTION
+
+kaw.MangaPage = function(startkey = null, lim = limit){
   var par = null;
   if (startkey == null){
     par = {
@@ -130,7 +185,7 @@ kaw.CallManga = function(startkey = null, lim = limit){
       }
     })
   })
-}
+}; // END MANGA PAGE FUNCTION
 
 kaw.CallNewComic = function(){
   var para = {
