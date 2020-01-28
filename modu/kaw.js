@@ -133,16 +133,26 @@ kaw.HomepageManga = function(){
     })
     .then(updata=>{
       //dedymo(updata);
-      dataobj.updata = updata;
+      for(let book of updata.Items){
+        var namearr = (book.name.S).split(' ');
+        for(let namefrag of namearr){
+          var temp = namefrag.charAt(0).toUpperCase() + namefrag.slice(1);
+          namearr[namearr.indexOf(namefrag)] = temp;
+        }
+      }
+      dataobj.upbook = updata;
+
       return featuredbook;
     })
     .then(featuredata =>{
       //dedymo(upfeatdata);
       dataobj.featbook = featuredata.Items;
+      dedymo(dataobj)
       outresole(dataobj);
     })
     .catch((err)=>{
       dedymoerr('ERROR - HOMEPAGE MANGA FUNCTION ' + err);
+      outresole(false);
     });
 
   });

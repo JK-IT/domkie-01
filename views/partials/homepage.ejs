@@ -7,5 +7,46 @@
     </ul>
   </div> <!--BODY NAVI LINKS DIV-->
 
+  <div id="bodyPlaceHolder" style="width: 100vw;">
+    <section class="book-peek">
+        <!--NEW COMING Row-->
+        <p class="div-title">New Coming</p>
+        <div class="new-coming">
+
+          <%for(let upbook of introbook.upbook){%>
+            <div class="new-book-div">
+              <div class="new-book-img"><img src="pillow1.jpg"> </div>
+              <div class="new-book-info">
+                <p>Title: <%= upbook.name.S%></p>
+                <p>Author: <%= upbook.author.S%></p>
+                <p>Summary:  <%= upbook.name.S%></p>
+              </div>
+            </div>
+          <%}%>
+
+          <div class="new-book-div">
+            <div class="new-book-img"><img src="robot-1658018_640.jpg"> </div>
+            <div class="new-book-info">
+              <p>Title: Domkie</p>
+              <p>Author: domkie</p>
+              <p>Summary: yo man yo</p>
+            </div>
+          </div>
+
+        </div> <!--new coming books-->
+
+        <!--Features Row-->
+        <p class="div-title">Features</p>
+        <div class="featured-book">
+          <div class="featured-book-div">
+            <div class="featured-img"><img src="jeans1.jpg" alt=""></div>
+            <div class="featured-info">infoname</div>
+          </div>
+          
+        </div> <!--featured books-->
+
+      </section> <!--BOOK PEEKING MANGA-->
+  </div> <!--HOMEPAGE BODY REPLACEABLE PART-->
+  
 
 </section> <!--BODY SECTION-->
