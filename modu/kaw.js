@@ -128,21 +128,43 @@ kaw.HomepageManga = function(){
           });
         });
       } else {
-        return data.Items;
+        return data;
       }
     })
     .then(updata=>{
       //dedymo(updata);
-      dataobj.updata = updata;
-      return featuredbook;
+      return new Promise((upres, uprej)=>{
+        (async function (){
+          for(let book of updata.Items){
+            var title = FirstUppercase(book.name.S);
+            book.title = title;
+            book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(' ', '+')+'/';
+            var key = title.replace(' ', '+') + '/sum.txt';
+            des3('key to get ' + key);
+            var sumtxt = await kaw.GetBlobText('domkie-booket', key);
+            book.sum = sumtxt;
+            
+          }
+          dataobj.upbook = updata.Items;
+          upres(featuredbook);
+        })();
+
+      })
     })
     .then(featuredata =>{
       //dedymo(upfeatdata);
+      for(let book of featuredata.Items){
+        var title = FirstUppercase(book.name.S);
+        book.title = title;
+        book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(' ', '+')+'/';
+      }
       dataobj.featbook = featuredata.Items;
+      dedymo(dataobj)
       outresole(dataobj);
     })
     .catch((err)=>{
       dedymoerr('ERROR - HOMEPAGE MANGA FUNCTION ' + err);
+      outresole(false);
     });
 
   });
@@ -187,71 +209,6 @@ kaw.MangaPage = function(startkey = null, lim = limit){
   })
 }; // END MANGA PAGE FUNCTION
 
-kaw.CallNewComic = function(){
-  var para = {
-    TableName : 'book_table',
-    //ConsistentRead: true, not working on global secondary indexes
-    Limit: 9,
-    IndexName: 'type-date-index',
-    ScanIndexForward: false,
-    ReturnConsumedCapacity: 'INDEXES',
-    ExpressionAttributeNames: {/*'#d': 'date', */'#t': 'type'},
-    ExpressionAttributeValues: {/*':d': {'S': time},*/ ':ty': {'S': 'comic'}},
-    //this is for key schema, date is not in key schema
-    //KeyConditionExpression: '#t = :ty AND #d > :d',
-    KeyConditionExpression: '#t = :ty', // AND #d >= :d',
-    //FilterExpression: '#d >= :d' using gsi u don't need this
-  }
-  return new Promise((resole, reject)=>{
-    dynamo.query(para, (err, data)=>{
-      if(err){
-        dedymoerr(`Error: Call new Comic ${err}`);
-        reject(err);
-      }else {
-        //dedymo(data);
-        resole(data);
-      }
-    })
-  })
-}
-
-kaw.CallComic = function(startkey = null, lim = limit){
-  var par = null;
-  if(startkey == null){
-    par = {
-      TableName: "book_table",
-      ExpressionAttributeNames: {'#ty': 'type'},
-      ExpressionAttributeValues: {':t' : {'S': 'comic'}},
-      KeyConditionExpression: '#ty = :t',
-      Limit: lim,
-      ConsistentRead: true,
-      ReturnConsumedCapacity: 'TOTAL'
-    }
-  } else {
-    par = {
-      TableName: "book_table",
-      ExpressionAttributeNames: {'#ty': 'type'},
-      ExpressionAttributeValues: {':t' : {'S': 'comic'}},
-      KeyConditionExpression: '#ty = :t',
-      Limit: lim,
-      ConsistentRead: true,
-      ExclusiveStartKey:startkey,
-      ReturnConsumedCapacity: 'TOTAL'
-    }
-  }
-  
-  return new Promise((resolve, reject)=>{
-    dynamo.query(par, (err, data)=>{
-      if(err != null){
-        dedymoerr(util.inspect(err, true, 5, true));
-        reject(err);
-      } else {
-        resolve(data);
-        dedymo(util.inspect(data, true, 5, true));
-      }
-    })
-  })
-}
 //----------&&&&&&&&&&&&&&&&&&&&&&&&
 //listing book by comic or manga
 kaw.CallBook = function(type, startkey = null) {
@@ -646,7 +603,17 @@ kaw.userLogin = function(email, pw){
   //========END MANUALLY SIGN UP SIGN IN
 */
 
+function FirstUppercase(instring) {
+  var strarr = (instring).split(' ');
+  for (let strfrag of strarr) {
+    var temp = strfrag.charAt(0).toUpperCase() + strfrag.slice(1);
+    strarr[strarr.indexOf(strfrag)] = temp;
+  }
+  return strarr.join(' ');
+}
+
 module.exports = kaw;
+
 
 
 

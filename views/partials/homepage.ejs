@@ -7,5 +7,41 @@
     </ul>
   </div> <!--BODY NAVI LINKS DIV-->
 
+  <div id="bodyPlaceHolder" style="width: 100vw;">
+    <section class="book-peek">
+        <!--NEW COMING Row-->
+        <p class="div-title">New Coming</p>
+        <div class="new-coming">
+
+          <%for(let upmanga of introManga.upbook){%>
+            <div class="new-book-div">
+              <%var imglink = upmanga.s3link + "cover.jpg"%>
+              <div class="new-book-img"><img src="<%= imglink%>"> </div>
+              <div class="new-book-info">
+                <p>Title: <%= upmanga.title%></p>
+                <p>Author: <%= upmanga.author.S%></p>
+                <p>Summary:  <%= upmanga.sum%></p>
+              </div>
+            </div>
+          <%}%>
+
+        </div> <!--new coming books-->
+
+        <!--Features Row-->
+        <p class="div-title">Features</p>
+        <div class="featured-book">
+          <%for(let featbook of introManga.featbook){%>
+            <div class="featured-book-div">
+              <%var imglink = featbook.s3link + "cover.jpg"%>
+              <div class="featured-img"><img src="<%= imglink%>"></div>
+              <div class="featured-info">featbook.title</div>
+            </div>
+          <%}%>
+          
+        </div> <!--featured books-->
+
+      </section> <!--BOOK PEEKING MANGA-->
+  </div> <!--HOMEPAGE BODY REPLACEABLE PART-->
+  
 
 </section> <!--BODY SECTION-->
