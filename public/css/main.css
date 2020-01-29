@@ -239,8 +239,13 @@ input:-webkit-autofill {
 }
 
 .new-coming .new-book-div .new-book-img img, .featured-book .new-book-div .new-book-img img {
+<<<<<<< HEAD
   width: 13vw;
   height: 14vw;
+=======
+  width: 11vw;
+  height: 12vw;
+>>>>>>> without-book-uploading
 }
 
 .new-coming .new-book-div .new-book-info, .featured-book .new-book-div .new-book-info {

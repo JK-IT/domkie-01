@@ -13,6 +13,7 @@
         <p class="div-title">New Coming</p>
         <div class="new-coming">
 
+<<<<<<< HEAD
           <%for(let upmanga of introManga.upbook){%>
             <div class="new-book-div">
               <%var imglink = upmanga.s3link + "cover.jpg"%>
@@ -21,15 +22,37 @@
                 <p>Title: <%= upmanga.title%></p>
                 <p>Author: <%= upmanga.author.S%></p>
                 <p>Summary:  <%= upmanga.sum%></p>
+=======
+          <%for(let upbook of introbook.upbook){%>
+            <div class="new-book-div">
+              <div class="new-book-img"><img src="pillow1.jpg"> </div>
+              <div class="new-book-info">
+                <p>Title: <%= upbook.name.S%></p>
+                <p>Author: <%= upbook.author.S%></p>
+                <p>Summary:  <%= upbook.name.S%></p>
+>>>>>>> without-book-uploading
               </div>
             </div>
           <%}%>
 
+<<<<<<< HEAD
+=======
+          <div class="new-book-div">
+            <div class="new-book-img"><img src="robot-1658018_640.jpg"> </div>
+            <div class="new-book-info">
+              <p>Title: Domkie</p>
+              <p>Author: domkie</p>
+              <p>Summary: yo man yo</p>
+            </div>
+          </div>
+
+>>>>>>> without-book-uploading
         </div> <!--new coming books-->
 
         <!--Features Row-->
         <p class="div-title">Features</p>
         <div class="featured-book">
+<<<<<<< HEAD
           <%for(let featbook of introManga.featbook){%>
             <div class="featured-book-div">
               <%var imglink = featbook.s3link + "cover.jpg"%>
@@ -37,6 +60,12 @@
               <div class="featured-info">featbook.title</div>
             </div>
           <%}%>
+=======
+          <div class="featured-book-div">
+            <div class="featured-img"><img src="jeans1.jpg" alt=""></div>
+            <div class="featured-info">infoname</div>
+          </div>
+>>>>>>> without-book-uploading
           
         </div> <!--featured books-->
 
