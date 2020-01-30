@@ -1,5 +1,15 @@
 @import url('https://fonts.googleapis.com/css?family=Paytone+One&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Righteous&display=swap');
 
+@mixin listyle{
+  text-decoration: none;
+  text-align: left;
+  display: inline-block;
+  padding-left: 15px;
+  padding-right: 15px;
+  cursor: pointer;
+  list-style-type: none;
+}
 #bodySection{
   width: 95vw;
   margin: auto;
@@ -8,17 +18,14 @@
 #bodyNaviLinks{
   
   ul li{
-    text-decoration: none;
-    text-align: left;
-    display: inline-block;
-    padding-left: 15px;
-    padding-right: 15px;
-    font-family: 'Paytone One', sans-serif ;
     font-size: 4vw;
+    font-family: 'Paytone One', sans-serif ;
+    @include listyle;
+
   }
 }
 
-.book-peek{
+.book-section{
   width: 100vw;
   display: flex;
   flex-flow: column nowrap;
@@ -31,11 +38,13 @@
     margin: auto;
     text-align: left;
     padding-top: 3vw;
-    font-size: 1.4vw;
+    font-size: 1.5vw;
     font-weight: 600;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid rgb(0, 3, 8);
+    color: rgb(0, 0, 0);
   }
 }
+
 
 .new-coming{
   flex: 1;
@@ -59,21 +68,35 @@
     align-items: center;
     margin-top: 1vw;
     margin-bottom: 1vw;
-    padding-left: 2vw;;
+    padding-left: 2vw;
+    cursor: pointer;
     .new-book-img{
-      flex: 0 0 auto;
+      flex: 0 0 15vw;
+      text-align: center;
       img{
-        width: 13vw;
-        height: 14vw;
-
+        width: 80%;
+        height: 15vw;
+        display:table-cell;
+        vertical-align: middle;
+        
       }
     }
     .new-book-info{
       flex: 1 1 auto;
       padding: 2vw;
       max-width: 60%;
-      max-height: 30vh;
+      //max-height: 20vh;
       overflow-y: auto;
+      p{
+        font-size: 0.7em;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+        text-overflow: -o-ellipsis-lastline;
+        overflow: hidden;
+      }
+
     }
 
   }
@@ -81,27 +104,79 @@
 
 .featured-book{
   @extend .new-coming;
+  margin-bottom: 10px;
   .featured-book-div{
-    flex: 0 0 30vw;
+    flex: 0 0 22vw;
     max-width: 35vw;
     display: flex;
     margin-top: 20px;
     margin-bottom: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
     flex-flow: column nowrap;
     justify-content: center;
     align-content: space-around;
+    align-items: center;
+    cursor: pointer;
     .featured-img{
-      width: 100%;
+      width: 22vw;
+      
+      text-align: center;
       img{
-        width: 13vw;
+        width: 50%;
         height: 14vw;
+        display: table-cell;
+        vertical-align: middle;
       }
     }
     .featured-info{
       width: 100%;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
+      
+      p{
+        text-align: center;
+        font-size: 1.4vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }     
     }
   }
+}
+
+@keyframes spin{
+  0%{transform: rotate(0deg);}
+  100%{transform: rotate(360deg);}
+}
+.spinLoading{
+  border: 10px solid #f5f5f5;
+  border-top: 10px solid #3498db;
+  border-radius: 50%;
+  margin:auto;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+.mangaListing {
+  width: 100vw;
+  padding: 2px;
+  
+}
+
+.book-navigation{
+  ul {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    li{
+    @include listyle;
+    font-family: 'Righteous', cursive;
+    font-size: 1.3em;
+  }
+  }
+}
+
+#mangaArea{
+  width: 100vw;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }

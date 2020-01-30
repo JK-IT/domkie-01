@@ -1,3 +1,23 @@
+window.onload = function(event){
+  //find which section is loaded to load more either manga or comic
+  
+}
+
+function LoadBook(type, subtype){
+  fetch(window.origin + '/book/' + type + '?subtype='+ subtype, {
+    method: 'GET',
+    credentials: "include",
+    cache: "no-cache"
+  }).then(resp=>{
+    return resp.json();
+  }).then(bookstr =>{
+    console.log(bookstr);
+  })
+  .catch(err=>{
+    console.log('LOAD BOOK ERR: ' + err)
+  })
+}
+
 function OpenBook(e, title, type){
   window.open(window.origin + '/book/' + type + '/' + title, '_blank', "fullscreen=yes,titlebar=yes,location=no");
 }

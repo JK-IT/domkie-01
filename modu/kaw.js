@@ -137,10 +137,10 @@ kaw.HomepageManga = function(){
         (async function (){
           for(let book of updata.Items){
             var title = FirstUppercase(book.name.S);
+            title = title.trim();
             book.title = title;
             book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(/\s/g, '+')+'/';
             var key = title + '/sum.txt';
-            des3('key to get ' + key);
             //getblobtext using sdk so no need to replace space with + sign
             var sumtxt = await kaw.GetBlobText('domkie-booket', key);
             book.sum = sumtxt;
@@ -157,11 +157,11 @@ kaw.HomepageManga = function(){
       //dedymo(upfeatdata);
       for(let book of featuredata.Items){
         var title = FirstUppercase(book.name.S);
-        book.title = title;
-        book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(' ', '+')+'/';
+        book.title = title.trim();
+        book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(/\s/g, '+')+'/';
       }
       dataobj.featbook = featuredata.Items;
-      dedymo(dataobj)
+      //dedymo(dataobj)
       outresole(dataobj);
     })
     .catch((err)=>{
@@ -173,29 +173,22 @@ kaw.HomepageManga = function(){
   
 }; // END HOMEPAGE MANGA FUNCTION
 
-kaw.MangaPage = function(startkey = null, lim = limit){
-  var par = null;
-  if (startkey == null){
-    par = {
-      TableName: "book_table",
-      ExpressionAttributeNames: {'#ty': 'type'},
-      ExpressionAttributeValues: {':t' : {'S': 'manga'}},
-      KeyConditionExpression: '#ty = :t',
-      Limit: lim,
-      ConsistentRead: true,
-      ReturnConsumedCapacity: 'TOTAL'
-    }
-  } else {
-    par = {
-      TableName: "book_table",
-      ExpressionAttributeNames: {'#ty': 'type'},
-      ExpressionAttributeValues: {':t' : {'S': 'manga'}},
-      KeyConditionExpression: '#ty = :t',
-      Limit: lim,
-      ConsistentRead: true,
-      ExclusiveStartKey: startkey,
-      ReturnConsumedCapacity: 'TOTAL'
-    }
+kaw.BookListing = function(type, subtype,startkey = null){
+  let usedkey = null;
+  if(starkey == null){
+    usedkey = {"NULL": true}
+  }
+
+  var par = {
+    TableName: "book-table",
+    IndexName: 'type-subtype-index',
+    ExpressionAttributeNames: {'#ty': 'type', '#subty': 'subtype'},
+    ExpressionAttributeValues: {':t' : {'S': type}, ':st' : {'S': subtype}},
+    KeyConditionExpression: '#ty = :t AND #subty = :st',
+    //Limit: lim,
+    ConsistentRead: true,
+    ReturnConsumedCapacity: 'INDEXES',
+    ExclusiveStartKey:  usedkey
   }
   
   return new Promise((resolve, reject)=>{
@@ -440,6 +433,7 @@ kaw.GetUploadCred = function(){
 }
 
 kaw.GetBlobText = function(bucket, key){
+  des3('Key to get ' + key);
   var par = {
     Bucket: bucket,
     Key: key
@@ -451,10 +445,11 @@ kaw.GetBlobText = function(bucket, key){
       dat += chunk;
     })
     txtbin.on('error', (err)=>{
-      des3err('error GET BLOB TEXT in KAW ' + err);
+      des3err('error GET BLOB TEXT in KAW ' + key + ' ---- ' + err);
       reject(false);
     })
     txtbin.on('end', ()=>{
+      //des3(dat);
       resolve(dat);
     })
   })
@@ -611,7 +606,7 @@ function FirstUppercase(instring) {
     var temp = strfrag.charAt(0).toUpperCase() + strfrag.slice(1);
     strarr[strarr.indexOf(strfrag)] = temp;
   }
-  return strarr.join(' ');
+  return String(strarr.join(' '));
 }
 
 module.exports = kaw;

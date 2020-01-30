@@ -10,24 +10,8 @@ let bookerr = debug.extend('book-router-error');
 
 book.get('/:type', (req, res)=>{
   var type = req.params.type;
-  kaw.CallBook(type, null)
-    .then(bookdata=>{
-      var filelink = '';
-      if(req.params.type == 'manga'){
-        filelink = 'views/partials/manga.ejs';
-      } else {
-        filelink = 'views/partials/comic.ejs';
-      }
-      ejs.renderFile(filelink, {bookdata: bookdata})
-        .then(str=>{
-          res.render('index', {page: str})
-        })
-        .catch(err =>{bookerr('getting error while ejs manga file ' + err);
-            res.render('/500')})
-    })
-    .catch(err=>{
-      res.redirect(GetUrl(req, res, 500));
-    })
+  var subtype = req.query.subtype;
+  kaw.BookListing(null, subtype)
   
 })
 

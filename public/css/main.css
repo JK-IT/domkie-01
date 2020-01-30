@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Vollkorn+SC&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Paytone+One&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Righteous&display=swap");
 .user-headbar .user-function button, .book-display-section .sub-navigate .search-bar button, .load-button, button:disabled {
   margin: auto;
   outline: none;
@@ -142,16 +143,18 @@ input:-webkit-autofill {
 }
 
 #bodyNaviLinks ul li {
+  font-size: 4vw;
+  font-family: 'Paytone One', sans-serif;
   text-decoration: none;
   text-align: left;
   display: inline-block;
   padding-left: 15px;
   padding-right: 15px;
-  font-family: 'Paytone One', sans-serif;
-  font-size: 4vw;
+  cursor: pointer;
+  list-style-type: none;
 }
 
-.book-peek {
+.book-section {
   width: 100vw;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -170,16 +173,17 @@ input:-webkit-autofill {
       align-content: space-around;
 }
 
-.book-peek .div-title {
+.book-section .div-title {
   -ms-flex-item-align: start;
       align-self: flex-start;
   width: 95vw;
   margin: auto;
   text-align: left;
   padding-top: 3vw;
-  font-size: 1.4vw;
+  font-size: 1.5vw;
   font-weight: 600;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid #000308;
+  color: black;
 }
 
 .new-coming, .featured-book {
@@ -230,22 +234,21 @@ input:-webkit-autofill {
   margin-top: 1vw;
   margin-bottom: 1vw;
   padding-left: 2vw;
+  cursor: pointer;
 }
 
 .new-coming .new-book-div .new-book-img, .featured-book .new-book-div .new-book-img {
   -webkit-box-flex: 0;
-      -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
+      -ms-flex: 0 0 15vw;
+          flex: 0 0 15vw;
+  text-align: center;
 }
 
 .new-coming .new-book-div .new-book-img img, .featured-book .new-book-div .new-book-img img {
-<<<<<<< HEAD
-  width: 13vw;
-  height: 14vw;
-=======
-  width: 11vw;
-  height: 12vw;
->>>>>>> without-book-uploading
+  width: 80%;
+  height: 15vw;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .new-coming .new-book-div .new-book-info, .featured-book .new-book-div .new-book-info {
@@ -254,20 +257,35 @@ input:-webkit-autofill {
           flex: 1 1 auto;
   padding: 2vw;
   max-width: 60%;
-  max-height: 30vh;
   overflow-y: auto;
+}
+
+.new-coming .new-book-div .new-book-info p, .featured-book .new-book-div .new-book-info p {
+  font-size: 0.7em;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  text-overflow: -o-ellipsis-lastline;
+  overflow: hidden;
+}
+
+.featured-book {
+  margin-bottom: 10px;
 }
 
 .featured-book .featured-book-div {
   -webkit-box-flex: 0;
-      -ms-flex: 0 0 30vw;
-          flex: 0 0 30vw;
+      -ms-flex: 0 0 22vw;
+          flex: 0 0 22vw;
   max-width: 35vw;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   margin-top: 20px;
   margin-bottom: 20px;
+  padding-left: 5px;
+  padding-right: 5px;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-flow: column nowrap;
@@ -277,22 +295,95 @@ input:-webkit-autofill {
           justify-content: center;
   -ms-flex-line-pack: distribute;
       align-content: space-around;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  cursor: pointer;
 }
 
 .featured-book .featured-book-div .featured-img {
-  width: 100%;
+  width: 22vw;
+  text-align: center;
 }
 
 .featured-book .featured-book-div .featured-img img {
-  width: 13vw;
+  width: 50%;
   height: 14vw;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .featured-book .featured-book-div .featured-info {
   width: 100%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+}
+
+.featured-book .featured-book-div .featured-info p {
+  text-align: center;
+  font-size: 1.4vw;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+.spinLoading {
+  border: 10px solid #f5f5f5;
+  border-top: 10px solid #3498db;
+  border-radius: 50%;
+  margin: auto;
+  width: 50px;
+  height: 50px;
+  -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite;
+}
+
+.mangaListing {
+  width: 100vw;
+  padding: 2px;
+}
+
+.book-navigation ul {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.book-navigation ul li {
+  text-decoration: none;
+  text-align: left;
+  display: inline-block;
+  padding-left: 15px;
+  padding-right: 15px;
+  cursor: pointer;
+  list-style-type: none;
+  font-family: 'Righteous', cursive;
+  font-size: 1.3em;
+}
+
+#mangaArea {
+  width: 100vw;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 footer {
