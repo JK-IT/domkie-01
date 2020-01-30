@@ -133,15 +133,15 @@ kaw.HomepageManga = function(){
     })
     .then(updata=>{
       //dedymo(updata);
-<<<<<<< HEAD
       return new Promise((upres, uprej)=>{
         (async function (){
           for(let book of updata.Items){
             var title = FirstUppercase(book.name.S);
             book.title = title;
-            book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(' ', '+')+'/';
-            var key = title.replace(' ', '+') + '/sum.txt';
+            book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(/\s/g, '+')+'/';
+            var key = title + '/sum.txt';
             des3('key to get ' + key);
+            //getblobtext using sdk so no need to replace space with + sign
             var sumtxt = await kaw.GetBlobText('domkie-booket', key);
             book.sum = sumtxt;
             
@@ -151,18 +151,7 @@ kaw.HomepageManga = function(){
         })();
 
       })
-=======
-      for(let book of updata.Items){
-        var namearr = (book.name.S).split(' ');
-        for(let namefrag of namearr){
-          var temp = namefrag.charAt(0).toUpperCase() + namefrag.slice(1);
-          namearr[namearr.indexOf(namefrag)] = temp;
-        }
-      }
-      dataobj.upbook = updata;
 
-      return featuredbook;
->>>>>>> without-book-uploading
     })
     .then(featuredata =>{
       //dedymo(upfeatdata);

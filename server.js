@@ -114,17 +114,11 @@ app.use((req, res, next)=>{
 app.get('/', (req, res)=>{
   (async function(){
     kaw.HomepageManga()
-<<<<<<< HEAD
     .then(introMangaBooks =>{
       if(!introMangaBooks){return res.redirect('500')}
 
       ejs.renderFile('views/partials/homepage.ejs', {introManga: introMangaBooks})
-=======
-    .then(homepageres =>{
-      if(!homepageres){return res.redirect('500')}
 
-      ejs.renderFile('views/partials/homepage.ejs', {introbook: homepageres})
->>>>>>> without-book-uploading
       .then(page=>{
         res.render('index', {page: page});
       }).catch(pageerr=>{
