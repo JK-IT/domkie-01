@@ -1,16 +1,26 @@
-<% bookdata.Items.forEach(function(book, index){ 
-  var imgurl = 'https://donkie-booket.s3-us-west-2.amazonaws.com/' + ((book.title.S).replace(" ","+")) + '/cover.jpg'; %>
-<div class="book-display" onclick="OpenBook(event, '<%= book.title.S%>', '<%= xtra.booktype%>')">
+<!--
+  THE OBJECT BOOKDATA IS ARRAY OF ITEMS
+  bookdata: [
+    {
+      rating: { S: '4' },
+      status: { S: 'Updating' },
+      subtype: { S: 'manga' },
+      time: { N: '1579797593' },
+      name: { S: 'tensei shitara slime datta ken' },
+      genre: { S: 'Action Adventure Comedy Fantasy Drama Shounen' },
+      author: { S: 'Fuse' },
+      type: { S: 'manga' },
+      title: 'Tensei Shitara Slime Datta Ken',
+      s3link: 's3bucketlink + title'
+    }
+  ]
+-->
+
+<% bookdata.forEach(function(book, index){ 
+  var imgurl = book.s3link + 'cover.jpg'; %>
+<div class="book-display")">
   <img src="<%= imgurl%>">
-  <p><%= book.title.S %></p>
+  <p><%= book.title %></p>
 </div>
 <%})%>
-<%if (typeof bookdata.LastEvaluatedKey != 'undefined'){%>
-  <%var publisher = null;
-    if (xtra.publisher != null) {
-      publisher = xtra.publisher;
-    }%>
-<button type="button" onclick="FetchMore(event, '<%= xtra.booktype%>', '<%= xtra.idtag%>', '<%= publisher%>')" class="load-button" data-lastkey='<%= JSON.stringify(bookdata.LastEvaluatedKey)%>'>Load More</button>
-<%}else {%>
-<button type="button" data-lastkey="" disabled>Load More</button>
-<%}%>
+

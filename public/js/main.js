@@ -1,17 +1,31 @@
 window.onload = function(event){
   //find which section is loaded to load more either manga or comic
-  
+  var secid = this.document.getElementById('mangaSection');
+  if(secid){
+    /**===> this is manga page */
+    this.LoadBook('manga', 'manga')
+  }
 }
 
 function LoadBook(type, subtype){
-  fetch(window.origin + '/book/' + type + '?subtype='+ subtype, {
+  fetch(window.origin + '/book/fetch/' + type + '?subtype='+ subtype, {
     method: 'GET',
     credentials: "include",
     cache: "no-cache"
   }).then(resp=>{
     return resp.json();
-  }).then(bookstr =>{
-    console.log(bookstr);
+  }).then(loadres =>{
+    let mangaarea = document.getElementById('mangaArea');
+    let spindiv = document.getElementsByClassName('spinLoading')[0];
+    if(!loadres.success){
+      mangaarea.removeChild(spindiv);
+      let p = document.createElement('p');
+      p.innerHTML = "Oops!! Something goes wrong, please reload the page."
+      mangaarea.appendChild(p);
+    } else {
+      mangaarea.removeChild(spindiv);
+      mangaarea.insertAdjacentHTML('beforeend', loadres.str);
+    }
   })
   .catch(err=>{
     console.log('LOAD BOOK ERR: ' + err)

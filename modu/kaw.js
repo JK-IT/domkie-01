@@ -1,6 +1,7 @@
 const kawaz = require('aws-sdk');
 const util = require('util');
 const denv = require('dotenv');
+const s3bucketlink = "https://domkie-booket.s3-us-west-2.amazonaws.com/"
 var debug = require('./debug');
 
 denv.config();
@@ -139,7 +140,7 @@ kaw.HomepageManga = function(){
             var title = FirstUppercase(book.name.S);
             title = title.trim();
             book.title = title;
-            book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(/\s/g, '+')+'/';
+            book.s3link = s3bucketlink + title.replace(/\s/g, '+')+'/';
             var key = title + '/sum.txt';
             //getblobtext using sdk so no need to replace space with + sign
             var sumtxt = await kaw.GetBlobText('domkie-booket', key);
@@ -158,7 +159,7 @@ kaw.HomepageManga = function(){
       for(let book of featuredata.Items){
         var title = FirstUppercase(book.name.S);
         book.title = title.trim();
-        book.s3link = "https://domkie-booket.s3-us-west-2.amazonaws.com/"+title.replace(/\s/g, '+')+'/';
+        book.s3link = s3bucketlink + title.replace(/\s/g, '+')+'/';
       }
       dataobj.featbook = featuredata.Items;
       //dedymo(dataobj)
@@ -174,11 +175,7 @@ kaw.HomepageManga = function(){
 }; // END HOMEPAGE MANGA FUNCTION
 
 kaw.BookListing = function(type, subtype,startkey = null){
-  let usedkey = null;
-  if(starkey == null){
-    usedkey = {"NULL": true}
-  }
-
+  // if Err return false
   var par = {
     TableName: "book-table",
     IndexName: 'type-subtype-index',
@@ -187,22 +184,27 @@ kaw.BookListing = function(type, subtype,startkey = null){
     KeyConditionExpression: '#ty = :t AND #subty = :st',
     //Limit: lim,
     ConsistentRead: true,
-    ReturnConsumedCapacity: 'INDEXES',
-    ExclusiveStartKey:  usedkey
+    ReturnConsumedCapacity: 'INDEXES'
   }
-  
+  if(startkey != null){
+    par.ExclusiveStartKey = starkey;
+  }
   return new Promise((resolve, reject)=>{
     dynamo.query(par, (err, data)=>{
       if(err != null){
-        reject(err);
+        /*--------->*/reject(false);
         dedymoerr(util.inspect(err, true, 5, true));
       } else {
-        resolve(data);
+        for(item of data.Items){
+          item.title = FirstUppercase(item.name.S);
+          item.s3link = s3bucketlink + item.title.replace(/\s/g, '+') + '/';
+        }
+        /*--------->*/resolve(data.Items);
         dedymo(util.inspect(data, true, 5, true));
       }
     })
   })
-}; // END MANGA PAGE FUNCTION
+}; // END MANGA PAGE FUNCTION 
 
 //----------&&&&&&&&&&&&&&&&&&&&&&&&
 //listing book by comic or manga
@@ -433,7 +435,7 @@ kaw.GetUploadCred = function(){
 }
 
 kaw.GetBlobText = function(bucket, key){
-  des3('Key to get ' + key);
+  //des3('Key to get ' + key);
   var par = {
     Bucket: bucket,
     Key: key

@@ -8,10 +8,24 @@ const memcache = require('memory-cache');
 let booklog = debug.extend('book-router')
 let bookerr = debug.extend('book-router-error');
 
-book.get('/:type', (req, res)=>{
+/*====> FETCHING BOOK TYPE AND SUBTYPE */
+book.get('/fetch/:type', (req, res)=>{
   var type = req.params.type;
   var subtype = req.query.subtype;
-  kaw.BookListing(null, subtype)
+  kaw.BookListing(type, subtype, null)
+  .then(result=>{ //array of items
+    return ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: result})
+  }).then(str=>{
+    res.end(JSON.stringify({
+      success: true,
+      str: str
+    }))
+  })  
+  .catch(err=>{
+    //res.status(500);
+    bookerr('FETCHING BOOK ERR ' + err);
+    res.end(JSON.stringify({success: false}))   
+  })
   
 })
 
@@ -69,94 +83,6 @@ book.get('/list/:type/:publisher', (req, res)=>{
     })
 })
 
-book.get('/fetch/:type', (req, res)=>{
-  var querykey = req.query.lastkey;
-  var publisher = req.query.publisher;
-  var xtrainfo = {publisher: null};
-  if(req.params.type == 'manga'){
-    xtrainfo.booktype = 'manga';
-    xtrainfo.idtag = 'mangaListing';
-  } else {
-    xtrainfo.booktype = 'comic';
-    xtrainfo.idtag = 'comicListing';
-  }
-  if(publisher != null){
-    booklog('publisher is not null ' + publisher);
-    xtrainfo.publisher = publisher;
-    kaw.GetBookByPublisher(publisher, ((querykey)? JSON.parse(querykey) : null))
-      .then(bookdata =>{
-        ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: bookdata, xtra: xtrainfo})
-        .then(str =>{
-          res.setHeader('Content-Type', 'application/json');
-          res.send(JSON.stringify({added: str}));
-          
-        })
-        .catch(err =>{
-          bookerr('error while rendering book by publisher ' + err)
-        })
-      })
-      .catch(err =>{
-        bookerr('error while fetch book by publisher ' + err);
-      })
-  } else {
-    var lastkeyobj = null;
-    if(querykey != null){
-      lastkeyobj = JSON.parse(querykey);
-    }
-    kaw.CallBook(req.params.type, lastkeyobj)
-    .then(bookdata=>{
-      ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: bookdata, xtra: xtrainfo})
-        .then(str =>{
-         //booklog(str);
-         res.setHeader('Content-Type', 'application/json');
-         res.send(JSON.stringify({added: str}));
-        })
-        .catch(err =>{
-          bookerr('error while rendering the additional book form fetching ' + err);
-        })
-    })
-    .catch(err =>{
-      bookerr('error while calling book')
-    })
-  }
-
-})
-
-book.get('/:type/:title', (req, res)=>{
-  var bookType = req.params.type;
-  var title = req.params.title;
-  booklog('get a request');
-  (async function(){
-    var bookdyna = function (){
-      return new Promise ((resolve, reject)=>{
-      kaw.GetBookdyna(title, bookType)
-        .then(bookinfo=>{
-          resolve(bookinfo)
-        })
-        .catch(err=>{bookerr('get err while getting book info from dynamodb ')})
-        })
-    }();
-    var books3 = function(){
-      return new Promise ((resolve, reject)=>{
-        kaw.GetBooks3(title)
-          .then(bookchap =>{resolve(bookchap)})
-          .catch(err =>{bookerr('getting error while getting book chapters from s3')})
-      })
-    }();
-    try{
-      var bookinfo = await bookdyna;
-      var bookchap = await books3;
-      ejs.renderFile('views/partials/bookpage.ejs', {bookinfo: bookinfo, bookchap: bookchap})
-        //.then(str=>{res.render('index', {page: str})})
-        .then(str=>{res.render('partials/bookpage.ejs', {bookinfo: bookinfo, bookchap: bookchap})})
-        .catch(err =>{bookerr('getting error while rendering Book Page ' + err);
-        res.render('/500');})
-    }catch(err){
-      bookerr('getting error while open a book');
-      res.render('/500');
-    }
-  })();
-})
 
 book.get("/open/:title/:chap", (req, res)=>{
   var ti = req.params.title;
@@ -183,9 +109,8 @@ book.get("/open/:title/:chap", (req, res)=>{
   helper function
 
 */
-function GetUrl (req, res, status){
-  res.status(status);
-  var url = req.protocol + '://' + req.get('host') + '/' + status.toString();
+function AssembleUrl (reqobj, endpoint){
+  var url = reqobj.protocol + '://' + reqobj.get('host') + '/' + endpoint;
   return url;
 }
 
