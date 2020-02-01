@@ -1,33 +1,50 @@
+<section id="mangaSection" class="book-section">
+  <!--NEW COMING Row-->
+  <p class="div-title">New Coming</p>
+  <div class="new-coming">
 
-<section class="book-display-section">
-  <div class="sub-navigate">
-    <div class="sub-link">
-      <ul>
-        <li onclick="BookGenreLink(event, 'browse manga', 'mangaListing')" class="sub-link-active"><a >Browse All</a></li>
-        <li onclick="BookGenreLink(event, 'manga', 'mangaListing')"><a>Manga</a></li>
-        <li onclick="BookGenreLink(event, 'manhwa', 'mangaListing')"><a>Manhwa</a></li>
-        <li onclick="BookGenreLink(event, 'manhua', 'mangaListing')"><a>Manhua</a></li>
-      </ul>
-    </div>
-    <%- include('./search-form.ejs')%>
-  </div>
-  <div class="search-result">
+    <%for(let upmanga of introManga.upbook){%>
+      <div class="new-book-div">
+        <%var imglink = upmanga.s3link + "cover.jpg"%>
+        <div class="new-book-img"><img src="<%= imglink%>"> </div>
+        <div class="new-book-info">
+          <p style='font-weight:600'><%= upmanga.title%></p>
+          <p> AUTHOR: <%= upmanga.author.S%></p>
+          <p><%= upmanga.sum%></p>
 
-  </div>
-  <hr style="width: 50%">
-
-  <div id="mangaListing" class="book-listing-stand">
-    <% bookdata.Items.forEach(function(book, index){ 
-      var imgurl = 'https://donkie-booket.s3-us-west-2.amazonaws.com/' + ((book.title.S).replace(" ","+")) + '/cover.jpg'; %>
-    <div class="book-display" onclick="OpenBook(event, '<%= book.title.S%>', 'manga')">
-      <img src="<%= imgurl%>">
-      <p><%= book.title.S %></p>
-    </div>
-    <%})%>
-    <%if (typeof bookdata.LastEvaluatedKey != 'undefined'){%>
-    <button type="button" onclick="FetchMore(event, 'manga', 'mangaListing')" class="load-button" data-lastkey='<%= JSON.stringify(bookdata.LastEvaluatedKey)%>'>Load More</button>
-    <%}else {%>
-    <button type="button" data-lastkey="" disabled>Load More</button>
+        </div>
+      </div>
     <%}%>
-  </div>
+  </div> <!--new coming books-->
+
+  <!--Features Row-->
+  <p class="div-title">Features</p>
+  <div class="featured-book">
+
+    <%for(let featbook of introManga.featbook){%>
+      <div class="featured-book-div">
+        <%var imglink = featbook.s3link + "cover.jpg"%>
+        <div class="featured-img"><img src="<%= imglink%>"></div>
+        <div class="featured-info">
+          <p style="font-weight: 520;"><%= featbook.title%></p>                
+        </div>
+      </div>
+    <%}%>
+
+  </div> <!--featured books-->
+
+  <div class="mangaListing">
+    <div class="book-navigation">
+      <ul>
+        <li>All</li>
+        <li>Manga</li>
+        <li>Manhwa</li>
+        <li>Manhua</li>
+      </ul>
+    </div> <!--MANGA NAVIGATION-->
+
+    <div id="bookArea">
+      <div  class="spinLoading" ></div>
+    </div><!--MANGA BOOKS AREA-->
+  </div> <!--MANGA LISTING-->
 </section>

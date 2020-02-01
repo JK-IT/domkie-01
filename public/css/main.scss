@@ -42,72 +42,7 @@
   }
 }
 
-/*
-  book display area
-*/
-.book-display-section{
-  width: 100vw;
-  display: flex;
-  flex-flow: column wrap;
-  justify-content: space-around;
-  align-content: space-around;
-  align-items: center;
-  .sub-navigate{
-    width: 90%;
-    margin: auto;
-    display: flex;
-    justify-content: flex-start;
-    align-content: space-around;
-    align-items: center;
-    margin-top: 1%;
-    .sub-link{
-      flex: 1 0 60%;
-      ul{
-        list-style-type: none;
-        text-align: center;
-        li{
-          cursor: pointer;
-          display: inline-block;
-          clear: both;
-          margin-left: 15px; 
-          a{
-            color: brown;
-            font-family: 'Vollkorn SC', serif;
-            border-bottom: solid 0px rgba(255, 255, 255, 0);
-            transition: color 1s ease-in-out, border-bottom 1s ease;
-            -webkit-transition: color 1s ease-in-out, border-bottom 1s ease;
-            -moz-transition: color 1s ease-in-out, border-bottom 1s ease;
-            -ms-transition: color 1s ease-in-out, border-bottom 1s ease;
-            -o-transition: color 1s ease-in-out, border-bottom 1s ease;
-}
-          a:hover{
-            color: rgb(7, 201, 39) !important;
-            border-bottom: solid 1px rgb(7, 201, 39);
-          }
-        }
-      }
-    }
-    .search-bar{
-      flex: 1 0 20%;
-      display:inline-block;
-      position: relative;
-      align-self: center;
-      form{
-        width: 90%;
-        margin:auto;
-      }
-      button{
-        @extend %button-decor;
-        background-color: rgba(255, 255, 255, 0);
-      }
-    }
-  }
-}
 
-.sub-link-active a{
-  color : rgb(14, 14, 170) !important;
-  border-bottom: solid 1px rgb(14, 14, 170) !important;
-}
 input[type=search]{
   padding-left: 15px;
   padding-right: 15px;
@@ -126,40 +61,6 @@ input[type=search]{
   width: 70%;
 }
 
-.book-listing-stand{
-  flex: 1;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-  align-content: center;
-  align-items: flex-start;
-  margin: 0.5%;
-}
-
-.book-display{
-  flex: 1 0 18vw;
-  max-width: 22vw;
-  margin: 0.5%;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-content: space-around;
-  align-items: flex-start;
-  cursor: pointer;
-  img{
-    height: 30vh;
-    width: auto;
-    margin:auto;
-    //flex: 1;
-  }
-  p{
-    flex: 1;
-    font-size: 1vw;
-    font-weight: bold;
-    text-align: center;
-    margin: auto;
-  }
-}
 //-----*****-------
 
 /*

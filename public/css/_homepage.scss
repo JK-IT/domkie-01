@@ -11,7 +11,7 @@
   list-style-type: none;
 }
 #bodySection{
-  width: 95vw;
+  width: 100vw;
   margin: auto;
 }
 
@@ -25,13 +25,14 @@
   }
 }
 
+// THE OUTEST ELEMENT THAT WRAP EVERYHING ---> WIDTH 100VW;
 .book-section{
   width: 100vw;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  align-content: space-around;
+  align-content: space-between;
   .div-title{
     align-self: flex-start;
     width: 95vw;
@@ -48,7 +49,7 @@
 
 .new-coming{
   flex: 1;
-  width: 90vw;
+  width: 95%;
   margin: auto;
   display: flex;
   flex-flow: row nowrap;
@@ -125,6 +126,7 @@
       img{
         width: 50%;
         height: 14vw;
+        margin: auto;
         display: table-cell;
         vertical-align: middle;
       }
@@ -138,6 +140,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
       }     
     }
   }
@@ -175,8 +178,44 @@
   }
 }
 
-#mangaArea{
-  width: 100vw;
-  margin-top: 10px;
-  margin-bottom: 10px;
+#bookArea{
+  width: 95%;
+  margin: auto;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: center;
+}
+
+.book-display{
+  flex: 1 0 15vw;
+  //max-width: 22vw;
+  margin: 5px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  
+  img{
+    height: 14vw;
+    width: auto;
+    margin:auto;
+  }
+  p{
+    flex: 1;
+    font-size: 1.1vw;
+    font-weight: bold;
+    text-align: center;
+    margin: auto;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    text-overflow: -o-ellipsis-lastline;
+    overflow: hidden;
+    
+  }
 }

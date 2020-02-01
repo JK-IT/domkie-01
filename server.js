@@ -117,11 +117,14 @@ app.get('/', (req, res)=>{
     .then(introMangaBooks =>{
       if(!introMangaBooks){return res.redirect('500')}
 
-      ejs.renderFile('views/partials/homepage.ejs', {introManga: introMangaBooks})
-
-      .then(page=>{
-        res.render('index', {page: page});
-      }).catch(pageerr=>{
+      ejs.renderFile('views/partials/manga.ejs', {introManga: introMangaBooks})
+      .then(manga=>{
+        return ejs.renderFile('views/partials/homepage.ejs', {page: manga})
+        
+      }).then(homepage=>{
+        res.render('index', {homepage: homepage});
+      })
+      .catch(pageerr=>{
         apperr(pageerr);
       });
 

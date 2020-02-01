@@ -15,16 +15,16 @@ function LoadBook(type, subtype){
   }).then(resp=>{
     return resp.json();
   }).then(loadres =>{
-    let mangaarea = document.getElementById('mangaArea');
+    let bookarea = document.getElementById('bookArea');
     let spindiv = document.getElementsByClassName('spinLoading')[0];
     if(!loadres.success){
-      mangaarea.removeChild(spindiv);
+      bookarea.removeChild(spindiv);
       let p = document.createElement('p');
       p.innerHTML = "Oops!! Something goes wrong, please reload the page."
-      mangaarea.appendChild(p);
+      bookarea.appendChild(p);
     } else {
-      mangaarea.removeChild(spindiv);
-      mangaarea.insertAdjacentHTML('beforeend', loadres.str);
+      bookarea.removeChild(spindiv);
+      bookarea.insertAdjacentHTML('beforeend', loadres.str);
     }
   })
   .catch(err=>{
