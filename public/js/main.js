@@ -8,13 +8,14 @@ window.onload = function(event){
 }
 
 function LoadBook(type, subtype){
-  fetch(window.origin + '/book/fetch/' + type + '?subtype='+ subtype, {
+  fetch(window.origin + '/book/fetch/load/' + type + '?subtype='+ subtype, {
     method: 'GET',
     credentials: "include",
     cache: "no-cache"
   }).then(resp=>{
     return resp.json();
   }).then(loadres =>{
+    console.log(loadres);
     let bookarea = document.getElementById('bookArea');
     let spindiv = document.getElementsByClassName('spinLoading')[0];
     if(!loadres.success){
@@ -32,12 +33,10 @@ function LoadBook(type, subtype){
   })
 }
 
-function OpenBook(e, title, type){
-  window.open(window.origin + '/book/' + type + '/' + title, '_blank', "fullscreen=yes,titlebar=yes,location=no");
-}
-
-function ListBook(e, type){
-  window.location.assign(window.origin + '/book/' + type);
+function DisplayBook(type, title){
+  console.log(type + ' ---- ' + title);
+  var name = title.toLowerCase();
+  window.location.href = window.origin + '/book/open?type=' + type + '&title=' + title;
 }
 
 function FetchMore(e, type, idname, publisher = null){

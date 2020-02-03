@@ -17,10 +17,12 @@
 -->
 
 <% bookdata.forEach(function(book, index){ 
-  var imgurl = book.s3link + 'cover.jpg'; %>
-<div class="book-display">
+  var imgurl = book.s3link + 'cover.jpg';
+%>
+<div class="book-display" onclick="DisplayBook('manga', '<%= book.title%>')">
   <img src="<%= imgurl%>">
   <p><%= book.title %></p>
+  <p><%= book.rating.S%> &#11088;</p>
 </div>
 <%})%>
 

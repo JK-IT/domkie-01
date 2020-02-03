@@ -9,7 +9,7 @@ let booklog = debug.extend('book-router')
 let bookerr = debug.extend('book-router-error');
 
 /*====> FETCHING BOOK TYPE AND SUBTYPE */
-book.get('/fetch/:type', (req, res)=>{
+book.get('/fetch/load/:type', (req, res)=>{
   var type = req.params.type;
   var subtype = req.query.subtype;
   kaw.BookListing(type, subtype, null)
@@ -28,6 +28,14 @@ book.get('/fetch/:type', (req, res)=>{
   })
   
 })
+
+/**=========== >>>  OPEN BOOK WITH TITLE */
+book.get('/open', (req, res)=>{
+  var type = req.query.type;
+  var title = req.query.title;
+  booklog(type + ' ---- ' + title)
+  res.end();
+}) 
 
 
 book.get('/search/:name', (req, res)=>{
@@ -80,28 +88,6 @@ book.get('/list/:type/:publisher', (req, res)=>{
     .catch(err => {
       bookerr('error while listing book by publisher ');
       
-    })
-})
-
-
-book.get("/open/:title/:chap", (req, res)=>{
-  var ti = req.params.title;
-  var chap = req.params.chap;
-  kaw.GetBookChap(ti, chap)
-    .then(data=>{
-      var imgobj = {
-        imglist: []
-      }
-      for(let i = 0; i < data.Contents.length; i++){
-        var imgpath = (data.Contents[i].Key).replace(/\s+/g, '+');
-        imgobj.imglist.push(`https://donkie-booket.s3-us-west-2.amazonaws.com/${imgpath}`)
-      }
-      res.set('Content-Type', 'application/json');
-      res.send(JSON.stringify(imgobj));
-      res.end();
-    })
-    .catch(err =>{
-      res.end(err);
     })
 })
 
