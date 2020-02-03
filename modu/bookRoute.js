@@ -34,6 +34,9 @@ book.get('/open', (req, res)=>{
   var type = req.query.type;
   var title = req.query.title;
   booklog(type + ' ---- ' + title)
+  kaw.OpenBook(type, title).then(data=>{
+    booklog(data);
+  })
   res.end();
 }) 
 

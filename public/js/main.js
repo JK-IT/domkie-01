@@ -15,7 +15,6 @@ function LoadBook(type, subtype){
   }).then(resp=>{
     return resp.json();
   }).then(loadres =>{
-    console.log(loadres);
     let bookarea = document.getElementById('bookArea');
     let spindiv = document.getElementsByClassName('spinLoading')[0];
     if(!loadres.success){
@@ -34,7 +33,7 @@ function LoadBook(type, subtype){
 }
 
 function DisplayBook(type, title){
-  console.log(type + ' ---- ' + title);
+  //console.log(type + ' ---- ' + title);
   var name = title.toLowerCase();
   window.location.href = window.origin + '/book/open?type=' + type + '&title=' + title;
 }

@@ -64,7 +64,7 @@ if(process.env.NODE_ENV == 'production'){
 } else {
   limit = 12;
 }
-var time = ((Date.now() / 1000) - (14* 86400)).toString();
+var time = ((Date.now() / 1000) - (7* 86400)).toString();
 dedymo ('time to compare : ' + time);
 
 //return ejs string rendering for updated and featured book
@@ -99,7 +99,7 @@ kaw.HomepageManga = function(){
       ReturnConsumedCapacity: 'INDEXES',
       ProjectionExpression: "#n, rating",
       ExpressionAttributeNames: {'#t': 'type', '#r': 'rating', '#n': 'name'},
-      ExpressionAttributeValues: {':ty':{'S': 'manga'}, ':ra': {'S': '3.5'}},
+      ExpressionAttributeValues: {':ty':{'S': 'manga'}, ':ra': {'S': '4.3'}},
       KeyConditionExpression: "#t = :ty AND #r > :ra"
     }
 
@@ -204,7 +204,69 @@ kaw.BookListing = function(type, subtype,startkey = null){
       }
     })
   })
-}; // END MANGA PAGE FUNCTION 
+}; // END BOOK LISTING FUNCTION
+
+kaw.OpenBook = function(type, title){
+  //get data from dynamo then s3
+  return new Promise((outres, outreject)=>{
+
+    var bookname = title.toLowerCase();
+    var dypar = {
+      TableName: 'book-table',
+      IndexName: 'type-name-index',
+      ExpressionAttributeNames: {'#t': 'type', '#n': 'name'},
+      ExpressionAttributeValues: {':ty': {'S': type}, ':bname': {'S': bookname}},
+      KeyConditionExpression: "#t = :ty AND #n = :bname",
+      ReturnConsumedCapacity: 'INDEXES'
+    }
+    var getbookdetails = new Promise((bres, breject)=>{
+      dynamo.query(dypar, (err, data)=>{
+        if(err) breject(err);
+        else bres(data);
+      })
+    })
+  
+    var s3par = {
+      Bucket: 'domkie-booket',
+      Prefix: title,
+    }
+    var getchapterlist = new Promise((cres, creject)=>{
+      s3.listObjectsV2(s3par, (err, data)=>{
+        if(err) creject(err);
+        else cres(data);
+      })
+    })
+    var resobj = {};
+    getbookdetails.then(bookdetail=>{
+      return new Promise((bdres, bdreject)=>{
+        (async function(){
+          //var title = FirstUppercase(bookdetail.Items[0].name.S);
+          bookdetail.Items[0].title = title;
+          bookdetail.Items[0].s3link = s3bucketlink + title.replace(/\s/g, '+') + '/';
+          bookdetail.Items[0].sum = await kaw.GetBlobText('domkie-booket', title+'/sum.txt');
+          resobj.bookdetail = bookdetail.Items[0];
+          bdres(getchapterlist);
+        })()
+      })
+    }).then(chapterlist=>{
+      let chaparr = [];
+      for(let keyobj of chapterlist.Contents){
+        var keyname = (((keyobj.Key).split('/')).pop())[1];
+        if(keyname){
+          chaparr.push(keyname);
+        }
+      }
+      return chaparr;
+    })
+    .then(chapres=>{
+      resobj.chaplist = chapres;
+      outres(resobj);
+    })
+    .catch(err=>{
+      des3err('ERROR OPENBOOK FUNCTION --- ' + err);
+    })
+  })
+}// OPEN BOOK FUNCTION
 
 //----------&&&&&&&&&&&&&&&&&&&&&&&&
 //listing book by comic or manga
