@@ -122,7 +122,7 @@ app.get('/', (req, res)=>{
         return ejs.renderFile('views/partials/homepage.ejs', {page: manga})
         
       }).then(homepage=>{
-        res.render('index', {homepage: homepage});
+        res.render('index', {renderpage: homepage});
       })
       .catch(pageerr=>{
         apperr(pageerr);

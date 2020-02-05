@@ -34,11 +34,17 @@ book.get('/open', (req, res)=>{
   var type = req.query.type;
   var title = req.query.title;
   booklog(type + ' ---- ' + title)
-  kaw.OpenBook(type, title).then(data=>{
-    booklog(data);
-  })
-  res.end();
-}) 
+  kaw.OpenBook(type, title).then(bookdetail=>{
+    ejs.renderFile('views/partials/bookpage.ejs', {bookdetail: bookdetail})
+    .then(respage=>{
+      res.render('index', {renderpage: respage})
+    }).catch(rendererr=>{
+      bookerr('RENDER BOOKPAGE ERR ---' + rendererr);
+      
+    });
+  });
+  
+}); 
 
 
 book.get('/search/:name', (req, res)=>{

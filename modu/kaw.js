@@ -195,15 +195,15 @@ kaw.BookListing = function(type, subtype,startkey = null){
         /*--------->*/reject(false);
         dedymoerr(util.inspect(err, true, 5, true));
       } else {
-        for(item of data.Items){
+        for(let item of data.Items){
           item.title = FirstUppercase(item.name.S);
           item.s3link = s3bucketlink + item.title.replace(/\s/g, '+') + '/';
         }
         /*--------->*/resolve(data.Items);
-        dedymo(util.inspect(data, true, 5, true));
+        //dedymo(util.inspect(data, true, 5, true));
       }
-    })
-  })
+    });
+  });
 }; // END BOOK LISTING FUNCTION
 
 kaw.OpenBook = function(type, title){
@@ -223,50 +223,25 @@ kaw.OpenBook = function(type, title){
       dynamo.query(dypar, (err, data)=>{
         if(err) breject(err);
         else bres(data);
-      })
-    })
-  
-    var s3par = {
-      Bucket: 'domkie-booket',
-      Prefix: title,
-    }
-    var getchapterlist = new Promise((cres, creject)=>{
-      s3.listObjectsV2(s3par, (err, data)=>{
-        if(err) creject(err);
-        else cres(data);
-      })
-    })
-    var resobj = {};
+      });
+    });
     getbookdetails.then(bookdetail=>{
-      return new Promise((bdres, bdreject)=>{
-        (async function(){
-          //var title = FirstUppercase(bookdetail.Items[0].name.S);
-          bookdetail.Items[0].title = title;
-          bookdetail.Items[0].s3link = s3bucketlink + title.replace(/\s/g, '+') + '/';
-          bookdetail.Items[0].sum = await kaw.GetBlobText('domkie-booket', title+'/sum.txt');
-          resobj.bookdetail = bookdetail.Items[0];
-          bdres(getchapterlist);
-        })()
-      })
-    }).then(chapterlist=>{
-      let chaparr = [];
-      for(let keyobj of chapterlist.Contents){
-        var keyname = (((keyobj.Key).split('/')).pop())[1];
-        if(keyname){
-          chaparr.push(keyname);
-        }
-      }
-      return chaparr;
-    })
-    .then(chapres=>{
-      resobj.chaplist = chapres;
-      outres(resobj);
+      (async function(){
+        //var title = FirstUppercase(bookdetail.Items[0].name.S);
+        bookdetail.Items[0].title = title;
+        bookdetail.Items[0].subtype.S = (bookdetail.Items[0].subtype.S).toUpperCase();
+        bookdetail.Items[0].s3link = s3bucketlink + title.replace(/\s/g, '+') + '/';
+        bookdetail.Items[0].sum = await kaw.GetBlobText('domkie-booket', title+'/sum.txt');
+        var chaplist = await kaw.GetBlobText('domkie-booket', title + '/chapterlist.txt');
+        bookdetail.Items[0].chaplist = (JSON.parse(chaplist)).chapterlist;
+        outres(bookdetail.Items[0]);
+      })();
     })
     .catch(err=>{
       des3err('ERROR OPENBOOK FUNCTION --- ' + err);
-    })
-  })
-}// OPEN BOOK FUNCTION
+    });
+  });
+};// OPEN BOOK FUNCTION
 
 //----------&&&&&&&&&&&&&&&&&&&&&&&&
 //listing book by comic or manga

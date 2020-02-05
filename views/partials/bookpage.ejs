@@ -1,55 +1,47 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Domkie</title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <base href="/">
-  <script data-ad-client="ca-pub-3062165550077294" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-  <!-- bookpage:css -->
-   <link rel="stylesheet" href="/css/main-ac37194c86.min.css">
-   <!-- endinject -->
-</head>
-  <body>
-    <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-    <![endif]-->
-    <section id='bookPage'>
-      <% var title = bookinfo.Items[0].title.S;
-        title = title.replace(" ","+");
-        var imgurl = 'https://donkie-booket.s3-us-west-2.amazonaws.com/' + title + '/cover.jpg';
-      %>
-      <div id='bookPageHead' style="background-image:url('<%= imgurl%>')">
-        <%if (bookinfo.Items[0].author.S != " "){%>
-        <h3 class='hight-light'><%= bookinfo.Items[0].author.S%></h3>
-        <br>
-        <%}else {%>  
-        <h3 class="hight-light"><%= bookinfo.Items[0].publisher.S%></h3><br>
-        <p style='font-size:1.2vw; background-color: rgba(240, 239, 239, 0.7); display:inline-block; clear:both;padding: 0.4%;color:rgb(1, 10, 51);border-radius: 4px;'><%= bookinfo.Items[0].genre.S%></p> <br>
-        <!--hr style='width:80%;margin:auto;'-->
-        <%}%>
-        <p class="hight-light"><%= bookinfo.Items[0].title.S%></p>
-        <p style="margin-top:1%;font-size:1.3vw"><%= bookinfo.Items[0].summary.S%></p>
-      </div>
-    
-      <div id='chapList'>
-        <% bookchap.CommonPrefixes.forEach(function(prefix, index){
-          var chapname = (prefix.Prefix.split('/'))[1];
-          %>
-          <p onclick="OpenChapter(event, '<%= bookinfo.Items[0].title.S%>', '<%= chapname%>')" class='list-row'><%= chapname%></p>
-          <div class="chap-container nodisplay" onclick="ToggleChapReading(event)"></div>
-        <%})%>
-      </div>
-    </section>    
 
-    <!-- bookpage:js -->
-      <script async defer type="text/javascript" src="/js/main-d104fc3db1.js"></script>
-      <!-- endinject -->
-  </body>
-</html>
+<!--
+    { rating: { S: '4.77' },
+app:book-router   status: { S: 'Updating' },
+app:book-router   subtype: { S: 'manga' },
+app:book-router   time: { N: '1580701206' },
+app:book-router   genre: { S: 'Comedy Shounen Harem Romance School Life Ecchi' },
+app:book-router   name: { S: 'bokutachi wa benkyou ga dekinai' },
+app:book-router   author: { S: 'TSUTSUI Taishi' },
+app:book-router   type: { S: 'manga' },
+app:book-router   title: 'Bokutachi Wa Benkyou Ga Dekinai',
+app:book-router   s3link:
+app:book-router    'https://domkie-booket.s3-us-west-2.amazonaws.com/Bokutachi+Wa+Benkyou+Ga+Dekinai/',
+app:book-router   sum:
+app:book-router    'The manga centers on Yuiga, a student studying for his college entrance exams. One day two beautiful young women appear before him.\r\n',
+app:book-router   chaplist:
+app:book-router    '{\r\n  "chapterlist": [\r\n    "Chapter 001  Question Genius and X are Two Sides of the Same Coin",\r\n    "Chapter 002  What are the geniuses aspirations",\r\n 
+"Chapter 003  The Geniuses Visiting is a Serious Matter",\r\n ] }
+
+-->
+<%var imglink = bookdetail.s3link + 'cover.jpg'%>
+<section class="bookpage-section"><!--Book Page secon-->
+  <div class="bookpage-head"> <!--BOOK PAGE HEAD-->
+    <div class="bookpage-img-cover"><img src="<%= imglink%>" alt="Book Cover"></div>
+    <div class="bookpage-detail"><!--BOOKPAGE DETAIL-->
+      <p><%= bookdetail.title%></p>
+      <p><%= bookdetail.author.S%></p>
+      <p><%= bookdetail.subtype.S%></p>
+      <p><%= bookdetail.status.S%></p>
+    </div><!--BOOKPAGE DETAIL-->
+    <div class="genre-sum-div"><!--GENRE SUM DIV-->
+      <p><%= bookdetail.genre.S%></p>
+      <p><%= bookdetail.sum%></p>
+    </div><!--GENRE SUM DIV--> 
+  </div><!--BOOK PAGE HEAD-->
+
+  <div class="bookpage-chaplist"> <!--BOOK PAGE CHAP LIST-->
+    <% for(let chap of bookdetail.chaplist){%>
+      <p><%= chap%></p>
+    <%}%>
+  </div> <!--BOOK PAGE CHAP LIST-->
+</section> <!--Book Page secon-->
+
+<!-- bookpage:js -->
+  <script async defer type="text/javascript" src="/js/main-d104fc3db1.js"></script>
+  <!-- endinject -->
 
