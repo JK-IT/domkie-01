@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Righteous&display=swap');
 //--------->>>>>>>>>>>>> BOOKPAGE SECTION
   // OUTTER MOST WRAPPING EVERYTHING
 .bookpage-section{
@@ -9,6 +10,7 @@
   align-content: center;
 }
 
+// ------------ COVER IMAGE AND SUMMARY
 .bookpage-head{
   flex: 0 0 100%;
   display: flex;
@@ -16,6 +18,8 @@
   justify-content: space-around;
   align-content: space-between;
   align-items: center;
+  padding-top: 18px;
+  margin-bottom: 12px;
   .bookpage-img-cover{
    flex: 0 0 40vw;
    text-align: center; //using this to center image
@@ -32,16 +36,60 @@
     flex: 0 0 50vw;
     p{
       text-align: left;
-      font-size: 1.6vw;
+      line-height: 3vw;
+      font-family: 'Righteous', cursive;
     }
   }
   .genre-sum-div{
     flex: 0 1 80%;
     margin: auto;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid rgb(159, 159, 159);
+    border-top: 1px solid rgb(159, 159, 159);
+    text-align: center;
+    :first-child{
+      background-color: #e6ffe6;
+      display: inline-block;
+      border-radius: 10px;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
     p{
-      text-align: center;
+      
       font-size: 1.3vw;
+      font-weight: bold;
+      margin-top: 5px;
+      margin-bottom: 5px;
       
     }
   }
+}
+
+//---------- CHAPTER LIST DECO
+.bookpage-chaplist{
+  width: 90%;
+  margin: auto;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-content: flex-start;
+  //align-self: center;
+  text-align: center;
+  max-height: 40vh;
+  p{
+    border-top: 1px solid rgb(180, 178, 178);
+    border-bottom: 1px solid grey;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 5px;
+    color: rgb(2, 2, 2);
+    flex: 1 1 100%;
+    cursor: pointer;
+  }
+}
+
+//---------- CHAPTER PAGES DECO
+.bookpage-chapter-page{
+  
 }

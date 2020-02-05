@@ -24,9 +24,10 @@ app:book-router    '{\r\n  "chapterlist": [\r\n    "Chapter 001  Question Genius
     <div class="bookpage-img-cover"><img src="<%= imglink%>" alt="Book Cover"></div>
     <div class="bookpage-detail"><!--BOOKPAGE DETAIL-->
       <p><%= bookdetail.title%></p>
-      <p><%= bookdetail.author.S%></p>
+      <p>Author: <%= bookdetail.author.S%></p>
       <p><%= bookdetail.subtype.S%></p>
-      <p><%= bookdetail.status.S%></p>
+      <p>Status: <%= bookdetail.status.S%></p>
+      <p>Rating: <%= bookdetail.rating.S%> &#10024</p>
     </div><!--BOOKPAGE DETAIL-->
     <div class="genre-sum-div"><!--GENRE SUM DIV-->
       <p><%= bookdetail.genre.S%></p>
@@ -39,7 +40,18 @@ app:book-router    '{\r\n  "chapterlist": [\r\n    "Chapter 001  Question Genius
       <p><%= chap%></p>
     <%}%>
   </div> <!--BOOK PAGE CHAP LIST-->
+
+  <!--This will be used to display the chapter content-->
+  <!--Replaceable div-->
+  <div id="bookpage-chapter-content">
+    <div class="bookpage-chapter-page">
+      
+    </div>
+  </div>
+
 </section> <!--Book Page secon-->
+
+
 
 <!-- bookpage:js -->
   <script async defer type="text/javascript" src="/js/main-d104fc3db1.js"></script>
