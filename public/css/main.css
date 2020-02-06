@@ -32,9 +32,10 @@
 }
 
 .hidden {
-  display: absolute !important;
+  display: none !important;
   top: -9999px !important;
   left: -9999px !important;
+  visibility: hidden;
 }
 
 * {
@@ -514,6 +515,8 @@ footer div p {
           align-items: center;
   padding-top: 18px;
   margin-bottom: 12px;
+  -webkit-box-shadow: 0px 0px 20px -12px black;
+          box-shadow: 0px 0px 20px -12px black;
 }
 
 .bookpage-head .bookpage-img-cover {
@@ -537,10 +540,21 @@ footer div p {
           flex: 0 0 50vw;
 }
 
+.bookpage-head .bookpage-detail :first-child {
+  display: inline-block;
+  background-color: #ff4483;
+  color: whitesmoke;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 10px;
+  font-size: 2vw;
+}
+
 .bookpage-head .bookpage-detail p {
   text-align: left;
   line-height: 3vw;
   font-family: 'Righteous', cursive;
+  font-size: 1.5vw;
 }
 
 .bookpage-head .genre-sum-div {
@@ -548,19 +562,20 @@ footer div p {
       -ms-flex: 0 1 80%;
           flex: 0 1 80%;
   margin: auto;
-  margin-top: 10px;
+  margin-top: 15px;
   margin-bottom: 5px;
-  border-bottom: 1px solid #9f9f9f;
-  border-top: 1px solid #9f9f9f;
+  border-top: 1px solid #b5b5b5;
   text-align: center;
 }
 
 .bookpage-head .genre-sum-div :first-child {
-  background-color: #e6ffe6;
+  background-color: #2b8eff;
+  color: whitesmoke;
   display: inline-block;
   border-radius: 10px;
   padding-left: 4px;
   padding-right: 4px;
+  margin-top: 10px;
 }
 
 .bookpage-head .genre-sum-div p {
@@ -585,8 +600,13 @@ footer div p {
           justify-content: center;
   -ms-flex-line-pack: start;
       align-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   text-align: center;
-  max-height: 40vh;
+  max-height: 50vh;
+  padding-top: 10px;
+  margin-bottom: 15px;
 }
 
 .bookpage-chaplist p {
@@ -595,11 +615,44 @@ footer div p {
   padding-left: 10px;
   padding-right: 10px;
   margin: 5px;
-  color: #020202;
   -webkit-box-flex: 1;
-      -ms-flex: 1 1 100%;
-          flex: 1 1 100%;
+      -ms-flex: 1 1 50%;
+          flex: 1 1 50%;
   cursor: pointer;
+}
+
+#bookpage-chapter-content {
+  width: 85vw;
+  margin: auto;
+}
+
+.bookpage-chapter-page {
+  width: 100%;
+  margin: auto;
+  margin-top: 1vh;
+  margin-bottom: 1vh;
+  max-height: 80vh;
+  text-align: center;
+  -webkit-box-shadow: 0 0 30px -10px grey;
+          box-shadow: 0 0 30px -10px grey;
+}
+
+.chaptitle-decor {
+  display: inline-block;
+  background-color: #ff2da7;
+  color: whitesmoke;
+  padding-left: 7px;
+  padding-right: 7px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+}
+
+.chaptitle-clicked {
+  background-color: #9239fd;
+  color: whitesmoke;
+  border-radius: 12px;
+  border: none !important;
 }
 
 .mar-create-sec {
@@ -1158,5 +1211,30 @@ button:disabled {
   color: beige;
   padding: 0.2%;
   margin: auto;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(78, 70, 91, 0.784) transparent;
+  scrollbar-track-color: transparent;
+}
+
+* ::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background-color: transparent;
+}
+
+* ::-webkit-scrollbar-thumb {
+  width: 5px;
+  background-color: rgba(78, 70, 91, 0.784);
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button :focus {
+  outline: 0;
 }
 /*# sourceMappingURL=main.css.map */

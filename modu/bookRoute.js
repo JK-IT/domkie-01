@@ -46,6 +46,28 @@ book.get('/open', (req, res)=>{
   
 }); 
 
+/**======== >>>> Display content of a chapter */
+book.get('/loadchap', (req, res)=>{
+  var chapprefix = req.query.chapprefix;
+  kaw.LoadChap(chapprefix)
+  .then(chapinfo=>{
+    /** chapinfo: {
+       *contents:  [{
+            Key: 'Land Lock/Chapter 004/004.jpg',
+            LastModified: 2020-01-26T01:09:59.000Z,
+            ETag: '"07c6b9f084f52b23db9ac17c2cf534a4"',
+            Size: 85062,
+            StorageClass: 'INTELLIGENT_TIERING'
+          }]
+      ,
+      s3link: s3bucketlink }
+     */
+    res.end(JSON.stringify({success: true, chapinfo: chapinfo}))
+  })
+  .catch(err=>{
+    res.end(JSON.stringify({success: false}))
+  })
+})
 
 book.get('/search/:name', (req, res)=>{
   booklog(req.params.name);

@@ -33,7 +33,8 @@
 }
 
 .hidden{
-  display: absolute !important;
+  display: none !important;
   top: -9999px !important;
   left:-9999px !important;
+  visibility: hidden;
 }

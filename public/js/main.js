@@ -7,6 +7,7 @@ window.onload = function(event){
   }
 }
 
+//------load book on homepage
 function LoadBook(type, subtype){
   fetch(window.origin + '/book/fetch/load/' + type + '?subtype='+ subtype, {
     method: 'GET',
@@ -30,13 +31,75 @@ function LoadBook(type, subtype){
   .catch(err=>{
     console.log('LOAD BOOK ERR: ' + err)
   })
-}
+} // =======>>>>>>>> LOAD BOOK FUNCTION
 
+//--------display book info and chapter lists
 function DisplayBook(type, title){
   //console.log(type + ' ---- ' + title);
   var name = title.toLowerCase();
   window.location.href = window.origin + '/book/open?type=' + type + '&title=' + title;
-}
+} // =======>>>>>>> DISPLAY BOOK FUNCTION
+
+//-----display chapter content
+function DisplayChapterContent(event, chapprefix){
+  let chapcontainer = document.getElementById('bookpage-chapter-content');
+  if(chapcontainer.children.length != 0){
+    if(chapcontainer.firstElementChild.nodeName == 'P'){
+      chapcontainer.removeChild(chapcontainer.lastElementChild);
+    } 
+  }
+  if(event.target.classList.contains('chaptitle-clicked')){
+    let childlist = Array.from(chapcontainer.children);
+    for(let child of childlist){
+      console.log(child)
+    }
+  }else {
+    fetch(window.origin + '/book/loadchap?chapprefix=' + chapprefix, {
+      method: 'GET',
+      credentials: "include"
+    })
+    .then(resp=>{
+      if(resp.ok){
+        return resp.json();
+      } else {
+        throw resp.text();
+      }
+    }).then(resobj=>{
+      let wrapdiv = document.createElement('div');
+      wrapdiv.setAttribute('data-chapter', event.target.innerText);
+      let h3 = document.createElement('h3');
+      h3.innerHTML = event.target.innerText;
+      event.target.classList.add('chaptitle-clicked')
+      h3.classList.add('chaptitle-decor')
+      wrapdiv.appendChild(h3);
+      
+      if(resobj.success){
+        let imgdivs = document.createElement('div');
+        imgdivs.classList.add('bookpage-chapter-page');
+        for(let chapkey of resobj.chapinfo.contents){
+          chapkey = chapkey.Key.replace(/\s/g, '+');
+          let img = document.createElement('img');
+          img.src = resobj.chapinfo.s3link + chapkey;
+          imgdivs.appendChild(img);
+        }
+        wrapdiv.appendChild(imgdivs)
+        chapcontainer.appendChild(wrapdiv);
+        let scrollby = 2*(window.innerHeight / 3);
+        window.scroll({
+          top: scrollby,
+          left:0,
+          behavior: "smooth"
+        })
+      } else {
+        let p = document.createElement('p');
+        p.innerHTML = "Failed to load chapter. Please reload the page!!!"
+        chapcontainer.appendChild(p);
+      }
+    }).catch(err=>{
+      console.log('DISPLAY CHAPTER CONTENT ERROR ' + err);
+    })
+  }
+} //======>>>>>> DISPLAY CHAPTER CONTENT
 
 function FetchMore(e, type, idname, publisher = null){
   var container = document.getElementById(idname);

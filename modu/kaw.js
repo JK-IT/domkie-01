@@ -243,73 +243,26 @@ kaw.OpenBook = function(type, title){
   });
 };// OPEN BOOK FUNCTION
 
-//----------&&&&&&&&&&&&&&&&&&&&&&&&
-//listing book by comic or manga
-kaw.CallBook = function(type, startkey = null) {
-  var par = {
-    TableName: 'book_table',
-    IndexName: 'type-date-index',
-    ExpressionAttributeNames: {'#t': 'type'},
-    ExpressionAttributeValues: {':ty': {'S': type}},
-    KeyConditionExpression: '#t = :ty',
-    ExclusiveStartKey: startkey,
-    Limit: limit,
-    //ConsistentRead: true,
-    ReturnConsumedCapacity: 'INDEXES'
-  }
-  return new Promise((resolve, reject)=>{
-    dynamo.query(par, (err, data)=>{
-      if(err){
-        dedymoerr('CallBook ' + err);
-        reject(err);
-      } else {
-        dedymo('CallBook ' + data);
-        resolve(data);
-      }
-    })
-  })
-}
-
-//get book from s3 don book, list all book chapters
-kaw.GetBooks3 = function (title){
-  var np = title + '/'//;
-  var par = {
-    Bucket : 'donkie-booket',
-    Delimiter: '/', //'cover',
-    Prefix: np
-  }
-  return new Promise((resolve, reject)=>{
-    s3.listObjectsV2(par, (err, data)=>{
-      if(err){
-        des3err(err);
-        reject(err);
-      } else {
-        des3(util.inspect(data, true, 4, true));
-        resolve(data);
-      }
-    })
-  })
-}
 //get images of the chapter , aka read the chapter
-kaw.GetBookChap = function(title, chap){
-  var np = title + '/' + chap; 
+kaw.LoadChap = function(chapprefix){
   var par = {
-    Bucket: 'donkie-booket',
+    Bucket: 'domkie-booket',
     //Delimiter: '/',
-    Prefix: np
+    Prefix: chapprefix
   }
   return new Promise((resolve, reject)=>{
     s3.listObjectsV2(par, (err, data)=>{
       if(err){
         des3err(err);
-        reject(err);
+        reject(false);
       } else {
-        des3(util.inspect(data, true, 4, true));
-        resolve(data);
+        //des3(util.inspect(data, true, 4, true));
+        let chapinfo = {s3link: s3bucketlink, contents : data.Contents}
+        resolve(chapinfo);
       }
     })
   })
-}
+} // ====== LOAD CHAP FUNCTION
 
 //use to get book info if u have full name
 kaw.GetBookdyna = function(title, type){
