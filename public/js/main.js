@@ -43,62 +43,91 @@ function DisplayBook(type, title){
 //-----display chapter content
 function DisplayChapterContent(event, chapprefix){
   let chapcontainer = document.getElementById('bookpage-chapter-content');
-  if(chapcontainer.children.length != 0){
+  let childlist = Array.from(chapcontainer.children);
+
+  if(childlist.length != 0){
+    //check if this is the error element
     if(chapcontainer.firstElementChild.nodeName == 'P'){
       chapcontainer.removeChild(chapcontainer.lastElementChild);
     } 
-  }
-  if(event.target.classList.contains('chaptitle-clicked')){
-    let childlist = Array.from(chapcontainer.children);
+
     for(let child of childlist){
-      console.log(child)
+      child.classList.add('hidden');
     }
-  }else {
-    fetch(window.origin + '/book/loadchap?chapprefix=' + chapprefix, {
-      method: 'GET',
-      credentials: "include"
-    })
-    .then(resp=>{
-      if(resp.ok){
-        return resp.json();
-      } else {
-        throw resp.text();
-      }
-    }).then(resobj=>{
-      let wrapdiv = document.createElement('div');
-      wrapdiv.setAttribute('data-chapter', event.target.innerText);
-      let h3 = document.createElement('h3');
-      h3.innerHTML = event.target.innerText;
-      event.target.classList.add('chaptitle-clicked')
-      h3.classList.add('chaptitle-decor')
-      wrapdiv.appendChild(h3);
-      
-      if(resobj.success){
-        let imgdivs = document.createElement('div');
-        imgdivs.classList.add('bookpage-chapter-page');
-        for(let chapkey of resobj.chapinfo.contents){
-          chapkey = chapkey.Key.replace(/\s/g, '+');
-          let img = document.createElement('img');
-          img.src = resobj.chapinfo.s3link + chapkey;
-          imgdivs.appendChild(img);
+    console.log(event.target);
+    if(event.target.classList.contains('chaptitle-clicked')){
+      //if true, then remove hidden class
+      let chaptitle = event.target.innerHTML;
+      console.log(chaptitle)
+      for(let child of childlist){
+        console.log(child.dataset.chapter);
+        if(child.dataset.chapter == chaptitle){
+          child.classList.remove('hidden');
+          break;
         }
-        wrapdiv.appendChild(imgdivs)
-        chapcontainer.appendChild(wrapdiv);
-        let scrollby = 2*(window.innerHeight / 3);
-        window.scroll({
-          top: scrollby,
-          left:0,
-          behavior: "smooth"
-        })
-      } else {
-        let p = document.createElement('p');
-        p.innerHTML = "Failed to load chapter. Please reload the page!!!"
-        chapcontainer.appendChild(p);
       }
-    }).catch(err=>{
-      console.log('DISPLAY CHAPTER CONTENT ERROR ' + err);
-    })
+      return; //stop the the execution of the rest of function
+    }
   }
+  fetch(window.origin + '/book/loadchap?chapprefix=' + chapprefix, {
+    method: 'GET',
+    credentials: "include"
+  })
+  .then(resp=>{
+    if(resp.ok){
+      return resp.json();
+    } else {
+      throw resp.text();
+    }
+  }).then(resobj=>{
+    let wrapdiv = document.createElement('div');
+    wrapdiv.setAttribute('data-chapter', event.target.innerText);
+    //chap title
+    let h3 = document.createElement('h3');
+    h3.innerHTML = event.target.innerText;
+    event.target.classList.add('chaptitle-clicked')
+    h3.classList.add('chaptitle-decor')
+    wrapdiv.appendChild(h3);
+    //button 
+    let prevbutt = document.createElement('button');
+    let prevchap = event.target.previousElementSibling.innerHTML;
+    prevbutt.addEventListener('click', function(e){
+      DisplayChapterContent(event, prevchap)();
+    })
+    prevbutt.innerHTML = "Previous Chapter";
+    wrapdiv.appendChild(prevbutt)
+    let nexbutt = document.createElement('button');
+    let nexchap = event.target.nextElementSibling.innerHTML;
+    nexbutt.addEventListener('click', function(e){
+
+      DisplayChapterContent(event, nexchap);
+    }) 
+    nexbutt.innerHTML = "Next Chapter";
+    wrapdiv.appendChild(nexbutt)
+
+    if(resobj.success){
+      let imgdivs = document.createElement('div');
+      imgdivs.classList.add('bookpage-chapter-page');
+      for(let chapkey of resobj.chapinfo.contents){
+        chapkey = chapkey.Key.replace(/\s/g, '+');
+        let img = document.createElement('img');
+        img.src = resobj.chapinfo.s3link + chapkey;
+        imgdivs.appendChild(img);
+      }
+      wrapdiv.appendChild(imgdivs)
+      chapcontainer.appendChild(wrapdiv); 
+      
+      //chapcontainer.scrollIntoView(true);
+      window.scrollTo(0, document.body.scrollHeight);
+    } else {
+      let p = document.createElement('p');
+      p.innerHTML = "Failed to load chapter. Please reload the page!!!"
+      chapcontainer.appendChild(p);
+    }
+  }).catch(err=>{
+    console.log('DISPLAY CHAPTER CONTENT ERROR ' + err);
+  })
+  
 } //======>>>>>> DISPLAY CHAPTER CONTENT
 
 function FetchMore(e, type, idname, publisher = null){
@@ -135,41 +164,6 @@ function FetchMore(e, type, idname, publisher = null){
     })
   }
   
-}
-
-function OpenChapter(e, title, chap){
-  (e.currentTarget).classList.add('opened-chap');
-  var chapcon = (e.currentTarget).nextElementSibling;
-  if(chapcon.childElementCount == 0){
-    fetch(window.origin + "/book/open/" + title + "/" + chap )
-    .then(function(resp){
-      if(resp.ok){
-        resp.json()
-        .then(chapdata =>{
-          chapdata.imglist.forEach(function(ele, idx){
-            var image = document.createElement('img');
-            image.src = ele;
-            chapcon.appendChild(image);
-          })
-          var button = document.createElement('button');
-          button.innerText = "End of Chapter";
-          button.style.width = "100%";
-          chapcon.appendChild(button);
-          chapcon.classList.toggle('nodisplay');
-        })
-      }
-    })
-    .catch(err=>{
-      console.error('getting error while fetching chapter ' + err);
-    })
-  } else {
-    chapcon.classList.toggle('nodisplay');
-  }
-  
-}
-
-function ToggleChapReading(e){
-  (e.currentTarget).classList.toggle('nodisplay');
 }
 
 function SearchBook(e){

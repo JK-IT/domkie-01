@@ -49,6 +49,10 @@
   overflow-x: hidden;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   display: block;
 }
@@ -493,6 +497,8 @@ footer div p {
       justify-content: space-around;
   -ms-flex-line-pack: center;
       align-content: center;
+  -ms-scroll-snap-type: y mandatory;
+      scroll-snap-type: y mandatory;
 }
 
 .bookpage-head {
@@ -586,7 +592,7 @@ footer div p {
 }
 
 .bookpage-chaplist {
-  width: 90%;
+  width: 80%;
   margin: auto;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -622,8 +628,9 @@ footer div p {
 }
 
 #bookpage-chapter-content {
-  width: 85vw;
+  width: 80vw;
   margin: auto;
+  scroll-snap-align: end;
 }
 
 .bookpage-chapter-page {

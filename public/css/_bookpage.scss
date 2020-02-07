@@ -8,6 +8,7 @@
   flex-flow: column nowrap;
   justify-content: space-around;
   align-content: center;
+  scroll-snap-type: y mandatory;
 }
 
 // ------------ COVER IMAGE AND SUMMARY
@@ -81,7 +82,7 @@
 
 //---------- CHAPTER LIST DECO
 .bookpage-chaplist{
-  width: 90%;
+  width: 80%;
   margin: auto;
   display: flex;
   flex-flow: row wrap;
@@ -107,9 +108,9 @@
 
 //---------- CHAPTER PAGES DECO
 #bookpage-chapter-content{
-  width: 85vw;
+  width: 80vw;
   margin: auto;
-  
+  scroll-snap-align: end;
 }
 
 .bookpage-chapter-page{
