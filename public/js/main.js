@@ -41,11 +41,30 @@ function DisplayBook(type, title){
 } // =======>>>>>>> DISPLAY BOOK FUNCTION
 
 //-----display chapter content
-function DisplayChapterContent(event, chapprefix){
+function DisplayChapterContent(event,chapprefix){
+  let booktitle = chapprefix.split('/')[0];
+  let inchap = chapprefix.split('/')[1];
   let chapcontainer = document.getElementById('bookpage-chapter-content');
   let childlist = Array.from(chapcontainer.children);
+  let chapterlist = Array.from(document.getElementsByClassName('bookpage-chaplist')[0].children);
+  let nexchaptitle = '';
+  let prevchaptitle = '';
+  let chapclicked = false;
+  for(let i = 0; i < chapterlist.length; i++){
+    if(chapterlist[i].innerHTML.replace(/\s/g, '') == inchap.replace(/\s/g, '')){
+      nexchaptitle = chapterlist[i+1].innerHTML;
+      prevchaptitle = chapterlist[i- 1].innerHTML;
+      if(chapterlist[i].classList.contains('chaptitle-clicked')){
+        chapclicked = true;
+      }
+    }
+  }
 
   if(childlist.length != 0){
+    /**IF CHILD LIST != 0 =>>>>> REMOVE THE HIDDEN CLASS
+     * IF NOT THEN JUST EXECUTE THE FETCH
+     */
+
     //check if this is the error element
     if(chapcontainer.firstElementChild.nodeName == 'P'){
       chapcontainer.removeChild(chapcontainer.lastElementChild);
@@ -54,19 +73,17 @@ function DisplayChapterContent(event, chapprefix){
     for(let child of childlist){
       child.classList.add('hidden');
     }
-    console.log(event.target);
-    if(event.target.classList.contains('chaptitle-clicked')){
-      //if true, then remove hidden class
-      let chaptitle = event.target.innerHTML;
-      console.log(chaptitle)
+
+    //***** GET TARGET CHAPTER EITHER FROM BUTTON OR P TAG LIST    
+    if(chapclicked){
+
       for(let child of childlist){
-        console.log(child.dataset.chapter);
-        if(child.dataset.chapter == chaptitle){
+        if((child.dataset.chapter).replace(/\s/g, '') == inchap.replace(/\s/g, '')){
           child.classList.remove('hidden');
           break;
         }
       }
-      return; //stop the the execution of the rest of function
+      return;//stop the the execution of the rest of function
     }
   }
   fetch(window.origin + '/book/loadchap?chapprefix=' + chapprefix, {
@@ -80,30 +97,33 @@ function DisplayChapterContent(event, chapprefix){
       throw resp.text();
     }
   }).then(resobj=>{
+    event.target.classList.add('chaptitle-clicked');
     let wrapdiv = document.createElement('div');
-    wrapdiv.setAttribute('data-chapter', event.target.innerText);
+    wrapdiv.setAttribute('data-chapter', inchap);
     //chap title
     let h3 = document.createElement('h3');
-    h3.innerHTML = event.target.innerText;
-    event.target.classList.add('chaptitle-clicked')
+    h3.innerHTML = inchap;
     h3.classList.add('chaptitle-decor')
     wrapdiv.appendChild(h3);
-    //button 
+
+    //**************  button 
     let prevbutt = document.createElement('button');
-    let prevchap = event.target.previousElementSibling.innerHTML;
+    let prechapprefix = booktitle + '/' + prevchaptitle;
     prevbutt.addEventListener('click', function(e){
-      DisplayChapterContent(event, prevchap)();
+      console.log('prev chapter -- ' + prevchaptitle);
+      DisplayChapterContent(event, prechapprefix)();
     })
     prevbutt.innerHTML = "Previous Chapter";
     wrapdiv.appendChild(prevbutt)
     let nexbutt = document.createElement('button');
-    let nexchap = event.target.nextElementSibling.innerHTML;
+    let nexchapprefix = booktitle +'/' +nexchaptitle;
     nexbutt.addEventListener('click', function(e){
-
-      DisplayChapterContent(event, nexchap);
+      console.log('next chapter -- ' + nexchapprefix);
+      DisplayChapterContent(event, nexchapprefix)();
     }) 
     nexbutt.innerHTML = "Next Chapter";
     wrapdiv.appendChild(nexbutt)
+    //************ END BUTTON */
 
     if(resobj.success){
       let imgdivs = document.createElement('div');
