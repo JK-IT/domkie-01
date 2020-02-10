@@ -106,6 +106,14 @@
   }
 }
 
+// CHAPTER TITLE ROW
+.chaptitle-clicked{
+  background-color:  rgb(146, 57, 253);
+  color: whitesmoke;
+  border-radius: 12px;
+  border: none !important;
+}
+
 //---------- CHAPTER PAGES DECO
 #bookpage-chapter-content{
   width: 80vw;
@@ -113,6 +121,16 @@
   scroll-snap-align: end;
 }
 
+.chapter-pages-wrapper{
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-content: center;
+  align-items: flex-start;
+}
+
+// LIST OF IMAGES OF CHAPTER
 .bookpage-chapter-page{
   width: 100%;
   margin: auto;
@@ -122,7 +140,7 @@
   text-align: center;
   box-shadow: 0 0 30px -10px grey;
 }
-
+// TITLE OF DISPLAY CHAPTER
 .chaptitle-decor{
   display: inline-block;
   background-color: rgb(255, 45, 167);
@@ -133,10 +151,14 @@
   margin-bottom: 8px;
   border-radius: 10px;
 }
-
-.chaptitle-clicked{
-  background-color:  rgb(146, 57, 253);
-  color: whitesmoke;
-  border-radius: 12px;
-  border: none !important;
+// BUTT NAVI DIV
+.bookpage-chapbutt-navi{
+  width: 100%;
+}
+// CHAP BUTT NAVI
+.chapbutt-navi{
+  margin-right: 12px;
+  margin-bottom: 10px;
+  display: inline-block;
+  @extend %gene-button;
 }

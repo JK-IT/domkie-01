@@ -122,9 +122,19 @@ input[type=search]{
 button:disabled{
   @extend %button-decor;
   cursor: not-allowed;
-  color: beige;
+  color: rgb(82, 82, 81);
   padding: 0.2%;
   margin: auto;
+  margin-right: 8px;
+  margin-left: 8px;
+}
+
+button{
+  :focus{
+    outline: 0;
+  }
+  -webkit-tap-highlight-color: transparent;
+
 }
 
 //----***STYLING SCROLLBAR IN GENERAL**-------
@@ -146,10 +156,3 @@ button:disabled{
 }
 
 //------*******SUPPRESSING THE RING OR TOUCH EFFECT ON CLICKED ELEMENT ----------
-button{
-  :focus{
-    outline: 0;
-  }
-  -webkit-tap-highlight-color: transparent;
-
-}

@@ -3,7 +3,7 @@
 @import url("https://fonts.googleapis.com/css?family=Paytone+One&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Righteous&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Righteous&display=swap");
-.user-headbar .user-function button, .load-button, button:disabled {
+.chapbutt-navi, .user-headbar .user-function button, .load-button, button:disabled {
   margin: auto;
   outline: none;
   border-radius: 10px;
@@ -15,7 +15,7 @@
   cursor: pointer;
 }
 
-.user-headbar .user-function button {
+.chapbutt-navi, .user-headbar .user-function button {
   background-color: #3f9b62;
   padding: 3px;
   padding-left: 8px;
@@ -627,10 +627,36 @@ footer div p {
   cursor: pointer;
 }
 
+.chaptitle-clicked {
+  background-color: #9239fd;
+  color: whitesmoke;
+  border-radius: 12px;
+  border: none !important;
+}
+
 #bookpage-chapter-content {
   width: 80vw;
   margin: auto;
   scroll-snap-align: end;
+}
+
+.chapter-pages-wrapper {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: column nowrap;
+          flex-flow: column nowrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -ms-flex-line-pack: center;
+      align-content: center;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
 }
 
 .bookpage-chapter-page {
@@ -655,11 +681,14 @@ footer div p {
   border-radius: 10px;
 }
 
-.chaptitle-clicked {
-  background-color: #9239fd;
-  color: whitesmoke;
-  border-radius: 12px;
-  border: none !important;
+.bookpage-chapbutt-navi {
+  width: 100%;
+}
+
+.chapbutt-navi {
+  margin-right: 12px;
+  margin-bottom: 10px;
+  display: inline-block;
 }
 
 .mar-create-sec {
@@ -1215,9 +1244,19 @@ input[type=search] {
 
 button:disabled {
   cursor: not-allowed;
-  color: beige;
+  color: #525251;
   padding: 0.2%;
   margin: auto;
+  margin-right: 8px;
+  margin-left: 8px;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button :focus {
+  outline: 0;
 }
 
 * {
@@ -1235,13 +1274,5 @@ button:disabled {
 * ::-webkit-scrollbar-thumb {
   width: 5px;
   background-color: rgba(78, 70, 91, 0.784);
-}
-
-button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-button :focus {
-  outline: 0;
 }
 /*# sourceMappingURL=main.css.map */

@@ -52,14 +52,21 @@ function DisplayChapterContent(event,chapprefix){
   let chapclicked = false;
   for(let i = 0; i < chapterlist.length; i++){
     if(chapterlist[i].innerHTML.replace(/\s/g, '') == inchap.replace(/\s/g, '')){
-      nexchaptitle = chapterlist[i+1].innerHTML;
-      prevchaptitle = chapterlist[i- 1].innerHTML;
+      if(chapterlist[i-1] == undefined){
+        nexchaptitle = chapterlist[i+1].innerHTML;
+      } else if(chapterlist[i+1] == undefined){
+        prevchaptitle = chapterlist[i-1].innerHTML;
+      } else {
+        nexchaptitle = chapterlist[i+1].innerHTML;
+        prevchaptitle = chapterlist[i- 1].innerHTML;
+      }
       if(chapterlist[i].classList.contains('chaptitle-clicked')){
         chapclicked = true;
+      } else {
+        chapterlist[i].classList.add('chaptitle-clicked');
       }
     }
   }
-
   if(childlist.length != 0){
     /**IF CHILD LIST != 0 =>>>>> REMOVE THE HIDDEN CLASS
      * IF NOT THEN JUST EXECUTE THE FETCH
@@ -76,7 +83,6 @@ function DisplayChapterContent(event,chapprefix){
 
     //***** GET TARGET CHAPTER EITHER FROM BUTTON OR P TAG LIST    
     if(chapclicked){
-
       for(let child of childlist){
         if((child.dataset.chapter).replace(/\s/g, '') == inchap.replace(/\s/g, '')){
           child.classList.remove('hidden');
@@ -107,22 +113,40 @@ function DisplayChapterContent(event,chapprefix){
     wrapdiv.appendChild(h3);
 
     //**************  button 
+    let butdiv = document.createElement('div');
+    butdiv.classList.add('bookpage-chapbutt-navi')
     let prevbutt = document.createElement('button');
-    let prechapprefix = booktitle + '/' + prevchaptitle;
-    prevbutt.addEventListener('click', function(e){
-      console.log('prev chapter -- ' + prevchaptitle);
-      DisplayChapterContent(event, prechapprefix)();
-    })
+    if(prevchaptitle == ''){
+      
+      prevbutt.setAttribute('disabled', true);
+    }else {
+      prevbutt.classList.add('chapbutt-navi');
+      let prechapprefix = booktitle + '/' + prevchaptitle;
+      prevbutt.addEventListener('click', function(e){
+        e.preventDefault;
+        console.log('prev chapter -- ' + prevchaptitle);
+        DisplayChapterContent(event, prechapprefix)();
+      })
+    }
     prevbutt.innerHTML = "Previous Chapter";
-    wrapdiv.appendChild(prevbutt)
+    butdiv.appendChild(prevbutt)
+
     let nexbutt = document.createElement('button');
-    let nexchapprefix = booktitle +'/' +nexchaptitle;
-    nexbutt.addEventListener('click', function(e){
-      console.log('next chapter -- ' + nexchapprefix);
-      DisplayChapterContent(event, nexchapprefix)();
-    }) 
+    if(nexchaptitle == ''){
+      
+      nexbutt.setAttribute('disabled', true);
+    }else {
+      nexbutt.classList.add('chapbutt-navi');
+      let nexchapprefix = booktitle +'/' +nexchaptitle;
+      nexbutt.addEventListener('click', function(e){
+        e.preventDefault;
+        console.log('next chapter -- ' + nexchapprefix);
+        DisplayChapterContent(event, nexchapprefix)();
+      });
+    }
     nexbutt.innerHTML = "Next Chapter";
-    wrapdiv.appendChild(nexbutt)
+    butdiv.appendChild(nexbutt)
+    wrapdiv.appendChild(butdiv);
     //************ END BUTTON */
 
     if(resobj.success){
