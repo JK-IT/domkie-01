@@ -210,6 +210,9 @@ function FetchMore(e, type, idname, publisher = null){
   
 }
 
+/**Sorting book by genre */
+
+/** SEARCH BOOK BY SUBTYPE */
 function SearchBook(e){
   e.preventDefault();
   console.log('get search req')
