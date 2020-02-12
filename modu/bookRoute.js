@@ -12,22 +12,34 @@ let bookerr = debug.extend('book-router-error');
 book.get('/fetch/load/:type', (req, res)=>{
   var type = req.params.type;
   var subtype = req.query.subtype;
-  kaw.BookListing(type, subtype, null)
-  .then(result=>{ //array of items
-    return ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: result})
-  }).then(str=>{
+  var startkey = req.query.startkey ? req.query.startkey : null;
+  kaw.BookListing(type, subtype, startkey)
+  .then(result=>{ //array of items and startkey
+    return new Promise((resolve, reject)=>{
+      ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: result})
+      .then(str=>{
+        resolve({
+          str:str,
+          startkey: result['startkey']
+        });
+      }).catch(err=>{
+        reject(err);
+      });
+    });
+  }).then(resobj=>{
     res.end(JSON.stringify({
       success: true,
-      str: str
-    }))
+      str: resobj.str,
+      startkey: resobj.startkey //startkey is stringtify
+    }));
   })  
   .catch(err=>{
     //res.status(500);
     bookerr('FETCHING BOOK ERR ' + err);
     res.end(JSON.stringify({success: false}))   
-  })
+  });
   
-})
+});
 
 /**=========== >>>  OPEN BOOK WITH TITLE */
 book.get('/open', (req, res)=>{
@@ -114,13 +126,13 @@ book.get('/list/:type/:publisher', (req, res)=>{
         .catch(err =>{
           bookerr('error while rendering book by publisher ' + err);
           
-        })
+        });
     })
     .catch(err => {
       bookerr('error while listing book by publisher ');
       
-    })
-})
+    });
+});
 
 /*
   helper function

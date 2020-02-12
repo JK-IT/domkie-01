@@ -3,13 +3,18 @@ window.onload = function(event){
   var secid = this.document.getElementById('mangaSection');
   if(secid){
     /**===> this is manga page */
-    this.LoadBook('manga', 'manga')
+    this.LoadBook('manga', 'all');
   }
 }
 
-//------load book on homepage
-function LoadBook(type, subtype){
-  fetch(window.origin + '/book/fetch/load/' + type + '?subtype='+ subtype, {
+//------load book by subtype on homepage
+function LoadBook(type, subtype, inkey=null){
+  //console.log(inkey);
+  var fetchurl = window.origin + '/book/fetch/load/' + type + '?subtype=' + subtype;
+  if(inkey != null){
+    fetchurl += '&startkey=' + inkey;
+  } 
+  fetch(fetchurl, {
     method: 'GET',
     credentials: "include",
     cache: "no-cache"
@@ -18,19 +23,49 @@ function LoadBook(type, subtype){
   }).then(loadres =>{
     let bookarea = document.getElementById('bookArea');
     let spindiv = document.getElementsByClassName('spinLoading')[0];
-    if(!loadres.success){
+    if(spindiv){
       bookarea.removeChild(spindiv);
+    }
+    if(!loadres.success){
       let p = document.createElement('p');
-      p.innerHTML = "Oops!! Something goes wrong, please reload the page."
+      p.innerHTML = "Oops!! Something goes wrong, please reload the page.";
       bookarea.appendChild(p);
     } else {
-      bookarea.removeChild(spindiv);
-      bookarea.insertAdjacentHTML('beforeend', loadres.str);
+      let bookshelf = document.getElementsByClassName('book-display-wrapper')[0];
+      if(!bookshelf){
+        bookshelf = document.createElement('div');
+        bookshelf.classList.add('book-display-wrapper');
+        bookarea.appendChild(bookshelf);
+      }
+      bookshelf.insertAdjacentHTML('beforeend', loadres.str);
+      let loadmorediv = document.getElementsByClassName('book-display-loadmore-button')[0];
+      if(loadres.startkey!= null){
+        if(loadmorediv){
+          while(loadmorediv.firstElementChild){
+            loadmorediv.removeChild(loadmorediv.lastElementChild);
+          }
+        } else {
+          loadmorediv = document.createElement('div');
+          loadmorediv.classList.add('book-display-loadmore-button');
+          bookarea.appendChild(loadmorediv);
+        }
+        let loadbutt = document.createElement('button');
+        loadbutt.innerHTML = 'Load More';
+        loadbutt.addEventListener('click', function(e){
+          let keyobj = JSON.parse(loadres.startkey);
+          LoadBook.call(null, keyobj.type.S, keyobj.subtype ? keyobj.subtype.S : 'all', loadres.startkey);
+        });
+        loadmorediv.appendChild(loadbutt);
+      } else {
+        if(loadmorediv){
+          bookarea.removeChild(loadmorediv);
+        }
+      }
     }
   })
   .catch(err=>{
-    console.log('LOAD BOOK ERR: ' + err)
-  })
+    console.log('LOAD BOOK ERR: ' + err);
+  });
 } // =======>>>>>>>> LOAD BOOK FUNCTION
 
 //--------display book info and chapter lists
@@ -174,45 +209,16 @@ function DisplayChapterContent(event,chapprefix){
   
 } //======>>>>>> DISPLAY CHAPTER CONTENT
 
-function FetchMore(e, type, idname, publisher = null){
-  var container = document.getElementById(idname);
-  var tar = e.currentTarget;
-  var lastkey = tar.getAttribute("data-lastkey");
-  if(publisher != '' && publisher != null){
-    fetch(window.origin + "/book/fetch/" + type + "/?lastkey=" + lastkey + "&publisher=" + publisher)
-    .then(resp=>{
-      if(resp.ok){
-        resp.json()
-        .then(data =>{
-          container.removeChild(container.lastElementChild);
-          container.innerHTML += data.added;
-        })
-      }
-    })
-    .catch(err =>{
-      console.error('getting error while fetching book by genre' + err);
-    })
-  } else {
-    fetch(window.origin + "/book/fetch/" + type + "/?lastkey=" + lastkey )
-    .then(resp =>{
-      if(resp.ok){
-        resp.json()
-        .then(data =>{
-          container.removeChild(container.lastElementChild);
-          container.innerHTML += data.added;
-        })
-      }
-    })
-    .catch(err =>{
-      console.error('getting error while fetching ' + err);
-    })
-  }
+// a wrapper function around LOAD MORE
+function FetchMoreButton(e, type, subtype, startkey = null){
+  e.preventDefault();
+  LoadBook.call(null, type, subtype, startkey);
   
-}
+} // ===>>>>>> END OF FET CH MORE BUTTON
 
 /**Sorting book by genre */
 
-/** SEARCH BOOK BY SUBTYPE */
+
 function SearchBook(e){
   e.preventDefault();
   console.log('get search req')

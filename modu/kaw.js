@@ -30,14 +30,14 @@ kawaz.config.update({region: 'us-west-2'});
 var s3 = new kawaz.S3({
   apiVersion: "2006-03-01"
 });
-let des3 = debug.extend('S3');
-let des3err = debug.extend('S3-error');
+let s3log = debug.extend('S3-log');
+let s3error = debug.extend('S3-error');
 
 const dynamo = new kawaz.DynamoDB({
   apiVersion:"2012-08-10"
 })
-let dedymo = debug.extend('dynamo');
-let dedymoerr = debug.extend('dynamo-error');
+let dymolog = debug.extend('dynamo');
+let dymoerr = debug.extend('dynamo-error');
 
 /* const searchDomain = new kawaz.CloudSearchDomain({
   endpoint: "search-book-table-search-5oqcixmwgwfnxpr77sdbhirwbq.us-west-2.cloudsearch.amazonaws.com",
@@ -65,7 +65,7 @@ if(process.env.NODE_ENV == 'production'){
   limit = 12;
 }
 var time = ((Date.now() / 1000) - (7* 86400)).toString();
-dedymo ('time to compare : ' + time);
+dymolog ('time to compare : ' + time);
 
 //return ejs string rendering for updated and featured book
 kaw.HomepageManga = function(){
@@ -133,7 +133,7 @@ kaw.HomepageManga = function(){
       }
     })
     .then(updata=>{
-      //dedymo(updata);
+      //dymolog(updata);
       return new Promise((upres, uprej)=>{
         (async function (){
           for(let book of updata.Items){
@@ -155,18 +155,18 @@ kaw.HomepageManga = function(){
 
     })
     .then(featuredata =>{
-      //dedymo(upfeatdata);
+      //dymolog(upfeatdata);
       for(let book of featuredata.Items){
         var title = FirstUppercase(book.name.S);
         book.title = title.trim();
         book.s3link = s3bucketlink + title.replace(/\s/g, '+')+'/';
       }
       dataobj.featbook = featuredata.Items;
-      //dedymo(dataobj)
+      //dymolog(dataobj)
       outresole(dataobj);
     })
     .catch((err)=>{
-      dedymoerr('ERROR - HOMEPAGE MANGA FUNCTION ' + err);
+      dymoerr('ERROR - HOMEPAGE MANGA FUNCTION ' + err);
       outresole(false);
     });
 
@@ -178,29 +178,47 @@ kaw.BookListing = function(type, subtype,startkey = null){
   // if Err return false
   var par = {
     TableName: "book-table",
-    IndexName: 'type-subtype-index',
-    ExpressionAttributeNames: {'#ty': 'type', '#subty': 'subtype'},
-    ExpressionAttributeValues: {':t' : {'S': type}, ':st' : {'S': subtype}},
-    KeyConditionExpression: '#ty = :t AND #subty = :st',
-    //Limit: lim,
+    //IndexName: 'type-subtype-index',
+    //ExpressionAttributeNames: {'#ty': 'type', '#subty': 'subtype'},
+    //ExpressionAttributeValues: {':t' : {'S': type}, ':st' : {'S': subtype}},
+    //KeyConditionExpression: '#ty = :t AND #subty = :st',
+    //Limit: 3,
     ConsistentRead: true,
-    ReturnConsumedCapacity: 'INDEXES'
+    ReturnConsumedCapacity: 'INDEXES',
+    //ProjectionExpression: '#bookname , rating'
+  } 
+  if(subtype == 'all'){
+    par.ExpressionAttributeNames = {'#ty': 'type'};
+    par.ExpressionAttributeValues = {':t': {'S': type}};
+    par.KeyConditionExpression = '#ty = :t';
+  } else {
+    par.IndexName = 'type-subtype-index';
+    par.ExpressionAttributeNames = {'#ty': 'type', '#subty': 'subtype'};
+    par.ExpressionAttributeValues = {':t': {'S': type}, ':st': {'S': subtype}};
+    par.KeyConditionExpression = '#ty = :t AND #subty = :st';
   }
   if(startkey != null){
-    par.ExclusiveStartKey = starkey;
+    par.ExclusiveStartKey = JSON.parse(startkey); //startkey is a string
+    //dymolog('start key get -- ' + util.inspect( JSON.parse(startkey), true, 3, true));
   }
   return new Promise((resolve, reject)=>{
     dynamo.query(par, (err, data)=>{
       if(err != null){
+        //dymoerr(' par that get error ' + util.inspect( par, true, 3, true));
         /*--------->*/reject(false);
-        dedymoerr(util.inspect(err, true, 5, true));
+        dymoerr(util.inspect(err, true, 5, true));
       } else {
         for(let item of data.Items){
           item.title = FirstUppercase(item.name.S);
           item.s3link = s3bucketlink + item.title.replace(/\s/g, '+') + '/';
         }
+        if(data.LastEvaluatedKey){
+          data.Items['startkey'] = JSON.stringify(data.LastEvaluatedKey);
+        } else{
+          data.Items['startkey'] = null;
+        }
         /*--------->*/resolve(data.Items);
-        //dedymo(util.inspect(data, true, 5, true));
+        dymolog(util.inspect(data, true, 5, true));
       }
     });
   });
@@ -238,7 +256,7 @@ kaw.OpenBook = function(type, title){
       })();
     })
     .catch(err=>{
-      des3err('ERROR OPENBOOK FUNCTION --- ' + err);
+      s3error('ERROR OPENBOOK FUNCTION --- ' + err);
     });
   });
 };// OPEN BOOK FUNCTION
@@ -253,40 +271,17 @@ kaw.LoadChap = function(chapprefix){
   return new Promise((resolve, reject)=>{
     s3.listObjectsV2(par, (err, data)=>{
       if(err){
-        des3err(err);
+        s3error(err);
         reject(false);
       } else {
-        //des3(util.inspect(data, true, 4, true));
+        //s3log(util.inspect(data, true, 4, true));
         let chapinfo = {s3link: s3bucketlink, contents : data.Contents}
         resolve(chapinfo);
       }
     })
   })
-} // ====== LOAD CHAP FUNCTION
+}; // ====== LOAD CHAP FUNCTION
 
-//use to get book info if u have full name
-kaw.GetBookdyna = function(title, type){
-  var name = title.toLowerCase();
-  var par = {
-    TableName: 'book_table',
-    ExpressionAttributeNames: {'#ty': 'type', '#n': 'name'},
-    ExpressionAttributeValues: {':typ': {'S': type}, ':na': {'S': name}},
-    KeyConditionExpression: '#ty = :typ AND #n = :na',
-    ConsistentRead: true,
-    ReturnConsumedCapacity: 'INDEXES'
-  }
-  return new Promise((resolve, reject)=>{
-    dynamo.query(par, (err, data)=>{
-      if(err){
-        dedymoerr(err);
-        reject(err);
-      } else {
-        dedymo(util.inspect(data, true, 5, true));
-        resolve(data);
-      }
-    })
-  })
-}
 
 //using in search
 kaw.FindBookName = function(name){
@@ -332,10 +327,10 @@ kaw.GetBookByPublisher = function(genre, starkey = null){
   return new Promise((resolve, reject)=>{
     dynamo.query(param, (err, data)=>{
       if(err){
-        dedymoerr('Get Book Publisher ' + err);
+        dymoerr('Get Book Publisher ' + err);
         reject('false');
       } else {
-        dedymo(util.inspect(data, true, 5, true));
+        dymolog(util.inspect(data, true, 5, true));
         resolve(data);
       }
     })
@@ -407,10 +402,10 @@ kaw.GetUserFolder = function(prefix){
   return new Promise((resolve, reject)=>{
     s3.listObjectsV2(par, (err, data)=>{
       if(err){
-        des3err('error - get user folder ' + err);
+        s3error('error - get user folder ' + err);
         reject(err);
       } else {
-        //des3(data);
+        //s3log(data);
         resolve(data);
       }
     })
@@ -425,7 +420,7 @@ kaw.GetUploadCred = function(){
 }
 
 kaw.GetBlobText = function(bucket, key){
-  //des3('Key to get ' + key);
+  //s3log('Key to get ' + key);
   var par = {
     Bucket: bucket,
     Key: key
@@ -437,11 +432,11 @@ kaw.GetBlobText = function(bucket, key){
       dat += chunk;
     })
     txtbin.on('error', (err)=>{
-      des3err('error GET BLOB TEXT in KAW ' + key + ' ---- ' + err);
+      s3error('error GET BLOB TEXT in KAW ' + key + ' ---- ' + err);
       reject(false);
     })
     txtbin.on('end', ()=>{
-      //des3(dat);
+      //s3log(dat);
       resolve(dat);
     })
   })
@@ -456,11 +451,11 @@ kaw.DeleteObjs = function(bucket, prefix){
     }
     s3.listObjectsV2(listpar, (err, data)=>{
       if(err){
-        des3err('ERROR - GETTING ITEMS IN KAW.DELETEOBJS ');
-        des3err(err);
+        s3error('ERROR - GETTING ITEMS IN KAW.DELETEOBJS ');
+        s3error(err);
       } else {
-        //des3('GETTING USERITEMS - KAW.DELETEOBJS ');
-        //des3(data);
+        //s3log('GETTING USERITEMS - KAW.DELETEOBJS ');
+        //s3log(data);
         let itemarray = [];
         for(let item of data.Contents){
           itemarray.push({Key: item.Key});
@@ -470,12 +465,12 @@ kaw.DeleteObjs = function(bucket, prefix){
           Delete: {Objects: itemarray}
         }, (err, opresult)=>{
           if(err){
-            des3err('KAW.DELETEOBJS: ERROR DELETING OBJECTS');
-            des3err(err);
+            s3error('KAW.DELETEOBJS: ERROR DELETING OBJECTS');
+            s3error(err);
             reject(false);
           } else {
-            des3('KAW.DELETEOBJS: DELETE SUCCESS ');
-            //des3(opresult);
+            s3log('KAW.DELETEOBJS: DELETE SUCCESS ');
+            //s3log(opresult);
             resolve(true);
           }
         })
@@ -506,22 +501,22 @@ kaw.DeleteObjs = function(bucket, prefix){
     var ec2meta = new kawaz.EC2MetadataCredentials();
     ec2meta.refresh((err)=>{
       if(err){
-        des3err(err);
+        s3error(err);
         reject(err);
       }else {
-        des3('--------========== create another s3 -------============')
-        des3('aws id ' + ec2meta.accessKeyId);
-        des3('sesstion token ' + ec2meta.sessionToken);
+        s3log('--------========== create another s3 -------============')
+        s3log('aws id ' + ec2meta.accessKeyId);
+        s3log('sesstion token ' + ec2meta.sessionToken);
         var anos3 = new kawaz.S3({
           accessKeyId: process.env.domadm,//ec2meta.accessKeyId,
           secretAccessKey: process.env.domkey//ec2meta.secretAccessKey,
         }) 
         anos3.createPresignedPost(par, (err, data)=>{
           if(err){
-            des3err('err creating presigned post ' + err);
+            s3error('err creating presigned post ' + err);
             reject(null);
           } else {
-            des3('usrl-presigned ' + util.inspect(data, true, 3, true));
+            s3log('usrl-presigned ' + util.inspect(data, true, 3, true));
             resolve(data);
           }
         })

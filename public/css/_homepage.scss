@@ -178,15 +178,25 @@
   }
   }
 }
-
+// ----- >>>> BOOK DISPLAY SSECTION
 #bookArea{
   width: 95%;
   margin: auto;
   display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.book-display-wrapper{
+  width: 100%;
+  display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
-  align-content: flex-start;
+  align-content: center;
   align-items: center;
+  padding-bottom: 18px;
 }
 
 .book-display{
@@ -218,5 +228,13 @@
     text-overflow: -o-ellipsis-lastline;
     overflow: hidden;
     
+  }
+}
+
+.book-display-loadmore-button{
+  
+  button{
+    @extend %gene-button;
+    background-color: rgb(18, 184, 114);
   }
 }

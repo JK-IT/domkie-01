@@ -1,22 +1,26 @@
 <!--
   THE OBJECT BOOKDATA IS ARRAY OF ITEMS
   bookdata: [
-    {
-      rating: { S: '4' },
-      status: { S: 'Updating' },
-      subtype: { S: 'manga' },
-      time: { N: '1579797593' },
-      name: { S: 'tensei shitara slime datta ken' },
-      genre: { S: 'Action Adventure Comedy Fantasy Drama Shounen' },
-      author: { S: 'Fuse' },
-      type: { S: 'manga' },
-      title: 'Tensei Shitara Slime Datta Ken',
-      s3link: 's3bucketlink + title'
-    }
-  ]
--->
+      {
+        rating: { S: '4' },
+        status: { S: 'Updating' },
+        subtype: { S: 'manga' },
+        time: { N: '1579797593' },
+        name: { S: 'tensei shitara slime datta ken' },
+        genre: { S: 'Action Adventure Comedy Fantasy Drama Shounen' },
+        author: { S: 'Fuse' },
+        type: { S: 'manga' },
+        title: 'Tensei Shitara Slime Datta Ken',
+        s3link: 's3bucketlink + title'
+      },
+      'startkey': .......(string type)
+
+    ]
+-->  
 
 <% bookdata.forEach(function(book, index){ 
+  type = book.type.S;
+  subtype = book.subtype.S;
   var imgurl = book.s3link + 'cover.jpg';
 %>
 <div class="book-display" onclick="DisplayBook('manga', '<%= book.title%>')">
@@ -25,4 +29,6 @@
   <p><%= book.rating.S%> &#11088;</p>
 </div>
 <%})%>
+
+
 
