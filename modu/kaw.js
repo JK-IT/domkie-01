@@ -1,7 +1,7 @@
 const kawaz = require('aws-sdk');
 const util = require('util');
 const denv = require('dotenv');
-const s3bucketlink = "https://domkie-booket.s3-us-west-2.amazonaws.com/"
+const s3bucketlink = "https://domkie-booket.s3-us-west-2.amazonaws.com/";
 var debug = require('./debug');
 
 denv.config();
@@ -67,7 +67,9 @@ if(process.env.NODE_ENV == 'production'){
 var time = ((Date.now() / 1000) - (7* 86400)).toString();
 dymolog ('time to compare : ' + time);
 
-//return ejs string rendering for updated and featured book
+/* ===  >>>> return ejs string rendering for updated and featured book
+   loading on homepage featured and new upcoming book
+*/
 kaw.HomepageManga = function(){
   return new Promise((outresole, outreject)=>{
     var para = {
@@ -99,8 +101,10 @@ kaw.HomepageManga = function(){
       ReturnConsumedCapacity: 'INDEXES',
       ProjectionExpression: "#n, rating",
       ExpressionAttributeNames: {'#t': 'type', '#r': 'rating', '#n': 'name'},
-      ExpressionAttributeValues: {':ty':{'S': 'manga'}, ':ra': {'S': '4.3'}},
-      KeyConditionExpression: "#t = :ty AND #r > :ra"
+      ExpressionAttributeValues: {':ty':{'S': 'manga'}, ':ra': {'S': '4.6'}},
+      KeyConditionExpression: "#t = :ty AND #r > :ra",
+      Limit: 6,
+      ScanIndexForward: false
     }
 
     var featuredbook = new Promise((featresolve, featreject)=>{
@@ -174,6 +178,7 @@ kaw.HomepageManga = function(){
   
 }; // END HOMEPAGE MANGA FUNCTION
 
+/** ===>>>>  listing books on homepage */
 kaw.BookListing = function(type, subtype,startkey = null){
   // if Err return false
   var par = {
@@ -224,6 +229,7 @@ kaw.BookListing = function(type, subtype,startkey = null){
   });
 }; // END BOOK LISTING FUNCTION
 
+/** ==== >>>> open book that is clicked */
 kaw.OpenBook = function(type, title){
   //get data from dynamo then s3
   return new Promise((outres, outreject)=>{
@@ -259,9 +265,9 @@ kaw.OpenBook = function(type, title){
       s3error('ERROR OPENBOOK FUNCTION --- ' + err);
     });
   });
-};// OPEN BOOK FUNCTION
+};// END OPEN BOOK FUNCTION
 
-//get images of the chapter , aka read the chapter
+/* ===>>>>> get images of the chapter , aka read the chapter*/
 kaw.LoadChap = function(chapprefix){
   var par = {
     Bucket: 'domkie-booket',
@@ -282,11 +288,52 @@ kaw.LoadChap = function(chapprefix){
   })
 }; // ====== LOAD CHAP FUNCTION
 
+/**=== >>> load books by using genre */
+kaw.BookGenreListing = function(type, genre, startkey){
+  return new Promise((outres, outreject)=>{
+    var par = {
+      TableName: 'book-table',
+      //IndexName: 'type-genre-index',
+      ExpressionAttributeNames: {'#ty': 'type', '#ge': 'genre'},
+      ExpressionAttributeValues: {':t':{'S': type}, ':ge':{'S': genre}},
+      KeyConditionExpression: "#ty = :t",
+      FilterExpression: "contains(#ge, :ge)",
+      ReturnConsumedCapacity: 'INDEXES',
+      //Limit: 4
+    };
+    if(startkey != 'none'){
+      par.ExclusiveStartKey = JSON.parse(startkey);
+    }
+    dynamo.query(par, (err, data)=>{
+      if(err) {
+        dymoerr(err);
+        outreject(false);
+      } else {
+        dymolog(data);
+        if(data.Count != 0){
+          for(let item of data.Items){
+            let title = FirstUppercase(item.name.S);
+            item.title = title;
+            item.s3link = s3bucketlink + (title.replace(/\s/g, '+'))+ '/';
+          }
+          if(data.LastEvaluatedKey){
+            data.Items['startkey'] = JSON.stringify(data.LastEvaluatedKey);
+          } else {
+            data.Items['startkey'] = null;
+          }
+        }
+        outres(data.Items);
+      }
+    });
+  });
+};// END BOOK GENRE LISTING
 
-//using in search
-kaw.FindBookName = function(name){
+
+/** Searching book by title or name */
+kaw.BookSearching = function(type, name, inarray, inkey = null){
+  /* THIS IS PARAM WHEN USING CLOUD SEARCH 
   var param = {
-    query: name, /* required */
+    //query: name,  required 
     //cursor: 'STRING_VALUE',
     //expr: 'STRING_VALUE',
     //facet: 'STRING_VALUE',
@@ -300,18 +347,47 @@ kaw.FindBookName = function(name){
     sort: 'name desc'
     //start: 'NUMBER_VALUE',
     //stats: 'STRING_VALUE'
+  } 
+  */
+  let par = {
+    TableName: 'book-table',
+    //IndexName: 'type-name-index',
+    ReturnConsumedCapacity: 'INDEXES',
+    ExpressionAttributeNames: {'#ty': 'type', '#name': 'name'},
+    ExpressionAttributeValues: {':t': {'S': type}, ':na': {'S': name}},
+    KeyConditionExpression: '#ty = :t',
+    FilterExpression: 'contains(#name, :na)',
+    //Limit: 2
+  };
+  if(inkey){
+    par.ExclusiveStartKey = inkey;
   }
-  return new Promise((resolve, reject)=>{
-    searchDomain.search(param, function(err, data){
+  //dymolog(inarray);
+  return new Promise((outres, outreject)=>{
+    dynamo.query(par, (err, data)=>{
       if(err){
-        searcherr('Error from cloudsearch ' + err);
-      } else {
-        resolve(data);
-        searchlog(util.inspect(data, true, 6, true))
+        dymoerr('Search Book Error ' + err);
+        outreject(false);
+      }else {
+        if(data.Count != 0){
+          inarray = inarray.concat(data.Items);
+        }
+        if(data.LastEvaluatedKey){
+          outres(kaw.BookSearching(type, name, inarray, data.LastEvaluatedKey ));
+        } else {
+          if(inarray.length != 0){
+            for(let item of inarray){
+              item.title = FirstUppercase( item.name.S);
+              item.s3link = s3bucketlink + (FirstUppercase(item.name.S)).replace(/\s/g, '+') + '/';
+            }
+          }
+          outres(inarray);
+        }
       }
-    })
-  })
-}
+    });
+  });
+}; // END BOOK SEARCHING FUNCTION
+
 
 kaw.GetBookByPublisher = function(genre, starkey = null){
   var param = {

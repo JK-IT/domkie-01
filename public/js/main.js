@@ -209,44 +209,150 @@ function DisplayChapterContent(event,chapprefix){
   
 } //======>>>>>> DISPLAY CHAPTER CONTENT
 
-// a wrapper function around LOAD MORE
-function FetchMoreButton(e, type, subtype, startkey = null){
+// a function that load book by subtype
+function SortbySubtype(e, type, subtype, inkey= null){
   e.preventDefault();
-  LoadBook.call(null, type, subtype, startkey);
+  //console.log(e.currentTarget);
+  let subnavi = document.getElementById('mangaNaviUl');
+  for(let li of subnavi.children){
+    li.removeAttribute('style');
+  }
+  let genrenavi = document.getElementById('mangaGenreUl');
+  for(let li of genrenavi.children){
+    li.removeAttribute('style');
+  }
+  e.currentTarget.setAttribute('style', 'color: brown;font-size: 1.3em;')
+  //clear current children of book area
+  let bookarea = document.getElementById('bookArea');
+  while(bookarea.lastElementChild){
+    bookarea.removeChild(bookarea.firstElementChild);
+  }
+  let spindiv = document.createElement('div');
+  spindiv.classList.add('spinLoading');
+  bookarea.appendChild(spindiv);
+  LoadBook.call(null, type, subtype, inkey);
   
-} // ===>>>>>> END OF FET CH MORE BUTTON
+} // ===>>>>>> END OF Sort By Subtype
 
 /**Sorting book by genre */
+function SortbyGenre(e, type, genre, inkey = null){
+  e.preventDefault();
+  //console.log(e.currentTarget)
+  let genreul = document.getElementById('mangaGenreUl');
+  for(let li of genreul.children){
+    li.removeAttribute('style');
+  }
+  let subnavi = document.getElementById('mangaNaviUl');
+  subnavi.children[0].setAttribute('style', 'color: brown;font-size: 1.3em;')
+  for(let i = 1; i < subnavi.children.length; i++){
+    subnavi.children[i].removeAttribute('style');
+    
+  }
+  e.currentTarget.setAttribute('style', 'color: rgb(6, 158, 100);font-size: 1.2em;');
+  let bookarea = document.getElementById('bookArea');
+  let genrediv = document.getElementById('genreDiv');
+  if(!genrediv){
+    while(bookarea.lastElementChild){
+      bookarea.removeChild(bookarea.firstElementChild);
+    }
+    genrediv = document.createElement('div');
+    genrediv.id = 'genreDiv';
+    genrediv.setAttribute('data-genre', genre);
+    bookarea.appendChild(genrediv);
+  } else {
+    if(genrediv.dataset.genre != genre){
+      while(genrediv.lastElementChild){
+        genrediv.removeChild(genrediv.lastElementChild);
+      }
+      if(document.getElementsByClassName('loadmore-button')[0]){
+        bookarea.removeChild(document.getElementsByClassName('loadmore-button')[0]);
+      }
+      genrediv.dataset.genre = genre;
+    }
+  }
+  // fetching book by genre
+  var fetchurl = window.origin + '/book/fetch/genre/'+ genre + '?type='+ type;
+  if(inkey != null){
+    fetchurl += '&startkey=' + inkey;
+  }
+  fetch(fetchurl, {
+    method: 'GET',
+    credentials: 'include',
+  }).then(resp=>{
+    if(resp.ok){
+      return resp.json();
+    }
+  }).then(jsres=>{
+    
+    if(jsres.success && jsres.str != 'empty'){
+      genrediv.insertAdjacentHTML('beforeend', jsres.str);
+      if(document.getElementsByClassName('loadmore-button')[0]){
+        bookarea.removeChild(document.getElementsByClassName('loadmore-button')[0]);
+      } 
+      if(jsres.startkey != 'none'){
+        let loadbutt = document.createElement('button');
+        loadbutt.innerHTML = 'Load More';
+        loadbutt.classList.add('loadmore-button');
+        loadbutt.addEventListener('click', function(event){
+          event.preventDefault();
+          SortbyGenre.call(null,event , type, genre, jsres.startkey);
+        });
+        bookarea.appendChild(loadbutt);
+      }
+    }
+  }).catch(err=>{
+    console.log('ERROR FETCHING BOOK BY GENRE -- ' + err);
+  });
+} // ==== >>> Sorting BOOK BY GENRE
 
-
+/** Searching book - Title or name*/
 function SearchBook(e){
   e.preventDefault();
-  console.log('get search req')
+  let booktype = '';
+  if(document.getElementById('mangaSection')){
+    booktype = 'manga';
+  } else {
+    booktype = 'comic';
+  }
   var bookname = ((document.forms.searchForm).elements.searchField).value;
   ((document.forms.searchForm).elements.searchField).value = "";
   bookname = bookname.toLowerCase();
-  fetch(window.origin + '/book/search/' + bookname)
+  let fetchurl = window.origin + '/book/search/'+booktype+'?bookname='+bookname;
+  fetch(fetchurl, {
+    method: 'GET',
+    credentials: 'include'
+  })
     .then(resp=>{
       if(resp.ok){
-        resp.json()
-          .then(data =>{
-            var seresdiv = document.getElementsByClassName('search-result')[0];
-            if(seresdiv.childElementCount != 0){
-              while(seresdiv.lastElementChild){
-                seresdiv.removeChild(seresdiv.lastElementChild);
-              }
-            }
-            seresdiv.innerHTML = data.searchres;
-          })
-          .catch(err =>{
-            console.error('getting error while parsing json from response')
-          })
+        return resp.json();
+      }else {
+        /* return new Promise((resolve, reject)=>{
+          resp.text().then(txt=>{
+            reject(txt);
+          });
+        }); */
+        throw resp.text();
+      }  
+    })
+    .then(jsres=>{
+      let bookarea = document.getElementById('bookArea');
+      let h3 = document.createElement('h3');
+      while(bookarea.lastElementChild){
+        bookarea.removeChild(bookarea.firstElementChild); 
+      }
+      if(jsres.str != 'empty'){
+        h3.innerHTML = 'Search Results:';
+        bookarea.appendChild(h3);
+        bookarea.insertAdjacentHTML('beforeend', jsres.str);
+      } else {
+        h3.innerHTML = 'X| Cannot Find The Title';
+        bookarea.appendChild(h3);
       }
     })
     .catch(err =>{
-      console.error('getting error while search for the book')
-    })
-}
+      console.error('getting error while search for the book ' + err);
+    });
+} // END BOOK SEARCHING FUNCTION
 
 function ClearSearch(e){
   var seresdiv = document.getElementsByClassName('search-result')[0];
@@ -254,88 +360,6 @@ function ClearSearch(e){
     while(seresdiv.lastElementChild){
       seresdiv.removeChild(seresdiv.lastElementChild);
     }
-  }
-}
-
-function BookGenreLink(e, genlink, divname){
-  var tar = e.currentTarget;
-  var parele = tar.parentElement; 
-  for(var ele of parele.children){
-    ele.classList.remove('sub-link-active');
-  }
-  tar.classList.add('sub-link-active');
-  var div = document.getElementById(divname);
-  if( div != null){
-    if(divname == 'comicListing'){
-      var comiclink = null;
-      switch(genlink){
-        case "Others": {
-          comiclink = window.origin + '/book/list/comic/' + 'Others';
-          break;
-        }
-        case "DC Comics":{
-          comiclink = window.origin + '/book/list/comic/' + 'DC Comics';
-          break;
-        }
-        case "Marvel Comics": {
-          comiclink = window.origin + '/book/list/comic/' + 'Marvel Comics';
-          break;
-        } 
-        default:{
-          comiclink = window.origin + '/book/fetch/comic?lastkey=null';
-        }
-      }
-      fetch(comiclink)
-      .then(resp => {
-        if(resp.ok){
-          resp.json()
-            .then(data =>{
-              while(div.lastElementChild){
-                div.removeChild(div.lastElementChild);
-              }
-              div.innerHTML += data.added;
-            })
-        }
-      })
-      .catch(err =>{
-        console.error('error while get book by comic genre ' + err);
-      })
-    } else {
-      var mangalink = null;
-      switch(genlink){
-        case "manga":{
-          mangalink = window.origin + '/book/list/manga/' + 'manga';
-          break;
-        }
-        case "manhwa": {
-          mangalink = window.origin + '/book/list/manga/' + 'manhwa';
-          break;
-        }
-        case "manhua": {
-          mangalink = window.origin + '/book/list/manga/' + 'manhua';
-          break;
-        }
-        default:{
-          mangalink = window.origin + '/book/fetch/manga?lastkey=null'
-        }
-      }
-      fetch(mangalink)
-      .then(resp =>{
-        if(resp.ok){
-          resp.json()
-            .then(data =>{
-              while(div.lastElementChild){
-                div.removeChild(div.lastElementChild);
-              }
-              div.innerHTML += data.added;
-            })
-        }
-      })
-      .catch(err =>{
-        console.error('error while get book by manga genre ' + err);
-      })
-    }
-    
   }
 }
 

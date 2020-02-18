@@ -3,7 +3,7 @@
 @import url("https://fonts.googleapis.com/css?family=Paytone+One&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Righteous&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Righteous&display=swap");
-.book-display-loadmore-button button, .chapbutt-navi, .user-headbar .user-function button, .load-button, button:disabled {
+.search-bar form button, .book-display-loadmore-button button, .loadmore-button, .chapbutt-navi, .user-headbar .user-function button, .load-button, button:disabled {
   margin: auto;
   outline: none;
   border-radius: 10px;
@@ -14,7 +14,7 @@
   border-color: transparent;
   cursor: pointer; }
 
-.book-display-loadmore-button button, .chapbutt-navi, .user-headbar .user-function button {
+.search-bar form button, .book-display-loadmore-button button, .loadmore-button, .chapbutt-navi, .user-headbar .user-function button {
   background-color: #3f9b62;
   padding: 3px;
   padding-left: 8px;
@@ -308,6 +308,7 @@ input:-webkit-autofill {
   -webkit-animation: spin 2s linear infinite;
           animation: spin 2s linear infinite; }
 
+/* ;;;;;;;;;;  >>>>>> BOOK NAVIGATION*/
 .mangaListing {
   width: 100vw;
   margin: auto; }
@@ -327,7 +328,66 @@ input:-webkit-autofill {
       cursor: pointer;
       list-style-type: none;
       font-family: 'Righteous', cursive;
-      font-size: 1.3em; }
+      font-size: 1em; }
+
+.search-bar {
+  width: 100%;
+  text-align: center;
+  display: block;
+  margin-bottom: 8px; }
+  .search-bar form {
+    width: 90%;
+    margin: auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: row nowrap;
+            flex-flow: row nowrap;
+    -ms-flex-pack: distribute;
+        justify-content: space-around;
+    -ms-flex-line-pack: center;
+        align-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center; }
+    .search-bar form input[type='search'] {
+      margin: auto;
+      -webkit-box-flex: 1;
+          -ms-flex: 1 1 85%;
+              flex: 1 1 85%;
+      margin-left: 8px;
+      margin-right: 8px; }
+    .search-bar form button {
+      -webkit-box-flex: 1;
+          -ms-flex: 1 1 auto;
+              flex: 1 1 auto;
+      padding: 0 !important;
+      background-color: #034255 !important; }
+
+.book-genre-navi {
+  width: 95%; }
+  .book-genre-navi ul {
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px; }
+    .book-genre-navi ul li {
+      text-decoration: none;
+      text-align: left;
+      display: inline-block;
+      padding-left: 15px;
+      padding-right: 15px;
+      cursor: pointer;
+      list-style-type: none;
+      font-size: 1.2vw;
+      margin-left: 10px;
+      margin-right: 10px;
+      margin-bottom: 5px;
+      margin-top: 2px;
+      font-weight: 550;
+      border-top: solid 1px black;
+      border-bottom: solid 1px black; }
 
 #bookArea {
   width: 95%;
@@ -348,7 +408,7 @@ input:-webkit-autofill {
       -ms-flex-align: center;
           align-items: center; }
 
-.book-display-wrapper {
+.book-display-wrapper, #genreDiv {
   width: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -408,6 +468,9 @@ input:-webkit-autofill {
     overflow: hidden; }
 
 .book-display-loadmore-button button {
+  background-color: #12b872; }
+
+.loadmore-button {
   background-color: #12b872; }
 
 footer {
@@ -521,76 +584,65 @@ footer {
       margin-bottom: 5px; }
 
 .bookpage-chaplist {
-  width: 80%;
+  width: 100%;
   margin: auto;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-flow: row wrap;
-          flex-flow: row wrap;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -ms-flex-line-pack: start;
-      align-content: flex-start;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  /* display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-content: flex-start;
+  align-items: center; */
   text-align: center;
-  max-height: 50vh;
-  padding-top: 10px;
-  margin-bottom: 15px; }
+  max-height: 55vh;
+  -webkit-box-shadow: 0 5px 10px -8px grey;
+          box-shadow: 0 5px 10px -8px grey; }
   .bookpage-chaplist p {
-    border-top: 1px solid #b4b2b2;
-    border-bottom: 1px solid grey;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin: 5px;
-    -webkit-box-flex: 1;
-        -ms-flex: 1 1 50%;
-            flex: 1 1 50%;
-    cursor: pointer; }
+    border-bottom: 1px solid #b3b3b3;
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    width: 80%;
+    margin: auto;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 1.7vw; }
+  .bookpage-chaplist p:first-child {
+    margin-top: 10px; }
 
 .chaptitle-clicked {
-  background-color: #9239fd;
-  color: whitesmoke;
-  border-radius: 12px;
-  border: none !important; }
+  color: #9239fd;
+  border-radius: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-style: oblique; }
 
 #bookpage-chapter-content {
   width: 80vw;
   margin: auto;
-  scroll-snap-align: end; }
+  scroll-snap-align: end;
+  margin-top: 10px; }
 
-.chapter-pages-wrapper {
+/* .chapter-pages-wrapper{
   width: 100%;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-flow: column nowrap;
-          flex-flow: column nowrap;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -ms-flex-line-pack: center;
-      align-content: center;
-  -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start; }
-
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-content: center;
+  align-items: flex-start;
+} */
 .bookpage-chapter-page {
   width: 100%;
   margin: auto;
   margin-top: 1vh;
   margin-bottom: 1vh;
   max-height: 80vh;
-  text-align: center;
-  -webkit-box-shadow: 0 0 30px -10px grey;
-          box-shadow: 0 0 30px -10px grey; }
+  text-align: center; }
+  .bookpage-chapter-page img {
+    width: 100%;
+    height: auto; }
 
 .chaptitle-decor {
   display: inline-block;
@@ -1083,9 +1135,9 @@ button {
   scrollbar-color: rgba(78, 70, 91, 0.784) transparent;
   scrollbar-track-color: transparent; }
   * ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 8px;
+    height: 6px;
     background-color: transparent; }
   * ::-webkit-scrollbar-thumb {
-    width: 5px;
+    width: 7px;
     background-color: rgba(78, 70, 91, 0.784); }

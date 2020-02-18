@@ -145,12 +145,12 @@ button{
   scrollbar-track-color: transparent;
   //for webkit base browser
   ::-webkit-scrollbar{
-    width: 5px;
-    height: 5px;
+    width: 8px;
+    height: 6px;
     background-color: transparent;
   }
   ::-webkit-scrollbar-thumb{
-    width: 5px;
+    width: 7px;
     background-color: rgba(78, 70, 91, 0.784);
   }
 }

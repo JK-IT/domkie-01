@@ -36,16 +36,16 @@ book.get('/fetch/load/:type', (req, res)=>{
   .catch(err=>{
     //res.status(500);
     bookerr('FETCHING BOOK ERR ' + err);
-    res.end(JSON.stringify({success: false}))   
+    res.end(JSON.stringify({success: err}));   
   });
   
-});
+}); // END FETCHING BOOK WITH TYPE AND SUBTYPE
 
 /**=========== >>>  OPEN BOOK WITH TITLE */
 book.get('/open', (req, res)=>{
   var type = req.query.type;
   var title = req.query.title;
-  booklog(type + ' ---- ' + title)
+  booklog(type + ' ---- ' + title);
   kaw.OpenBook(type, title).then(bookdetail=>{
     ejs.renderFile('views/partials/bookpage.ejs', {bookdetail: bookdetail})
     .then(respage=>{
@@ -56,7 +56,7 @@ book.get('/open', (req, res)=>{
     });
   });
   
-}); 
+}); // END OPEN BOOK ROUTE
 
 /**======== >>>> Display content of a chapter */
 book.get('/loadchap', (req, res)=>{
@@ -79,28 +79,84 @@ book.get('/loadchap', (req, res)=>{
   .catch(err=>{
     res.end(JSON.stringify({success: false}))
   })
-})
+}); // END LOADING CHAPTER
 
-book.get('/search/:name', (req, res)=>{
-  booklog(req.params.name);
-  kaw.FindBookName(req.params.name)
-    .then(result=>{
-      res.setHeader('Content-Type', 'application/json');
-      booklog(result);
-      ejs.renderFile('views/partials/search-result.ejs', {resdata: result.hits})
+/** >>>>>> sort by genre route --fetching */
+book.get('/fetch/genre/:genre', (req, res)=>{
+  var genre = req.params.genre;
+  var type = req.query.type;
+  let key = '';
+  if(req.query.startkey){
+    key = req.query.startkey;
+  } else {
+    key = 'none';
+  }
+  kaw.BookGenreListing(type, genre,key)
+  .then(kawres=>{
+    if(kawres.length == 0){
+      res.end(JSON.stringify({
+        success: true,
+        str: 'empty'
+      }));
+    } else {
+      return new Promise((resole, reject)=>{
+        ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: kawres})
         .then(str=>{
-          booklog(str);
-          res.send(JSON.stringify({searchres: str}))
+          resole({
+            str: str,
+            lastkey: kawres['startkey'] ? kawres['startkey']: 'none'
+          });
         })
-        .catch(err =>{
-          bookerr('error while rendering search res ' + err)
-        })
-      
-    })
-    .catch(err =>{
-      
-    })
-})
+        .catch(err=>{
+          bookerr('RENDER BOOK DATA ERROR ' + err);
+        });
+      });
+    }
+  })
+  .then(resobj=>{
+    res.end(JSON.stringify({
+      success: true,
+      str: resobj.str,
+      startkey: resobj.lastkey
+    }));
+  })
+  .catch(err=>{
+    if(!err){
+      res.end(JSON.stringify({success: false}));
+    } 
+  });
+}); //END SORT BY GENRE ROUTING
+
+/**Book Searching function */
+book.get('/search/:booktype', (req, res)=>{
+  let booktype = req.params.booktype;
+  let bookname = req.query.bookname;
+  var items = [];
+  kaw.BookSearching(booktype, bookname, items)
+  .then(searchres=>{
+    if(searchres.length != 0){
+      return ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: searchres});
+    }else {
+      res.end(JSON.stringify({
+        success: true,
+        str: 'empty'
+      }));
+    }
+  })
+  .then(str=>{
+    res.set('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      success: true,
+      str: str
+    }));
+  })
+  .catch(err =>{
+    res.set('Content-Type', 'text/plain');
+    res.status(400);
+    res.end('False to find book');
+  });
+  
+}); // END BOOK SEARCHING
 
 book.get('/list/:type/:publisher', (req, res)=>{
   var publisher =  req.params.publisher;

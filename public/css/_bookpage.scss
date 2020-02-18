@@ -82,36 +82,45 @@
 
 //---------- CHAPTER LIST DECO
 .bookpage-chaplist{
-  width: 80%;
+  width:100%;
   margin: auto;
-  display: flex;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  /* display: flex;
   flex-flow: row wrap;
-  justify-content: center;
+  justify-content: space-between;
   align-content: flex-start;
-  align-items: center;
+  align-items: center; */
   text-align: center;
-  max-height: 50vh;
-  padding-top: 10px;
-  margin-bottom: 15px;
-  
+  max-height: 55vh;
+  box-shadow: 0 5px 10px -8px grey;
   p{
-    border-top: 1px solid rgb(180, 178, 178);
-    border-bottom: 1px solid grey;
-    //display: inline-block;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin: 5px;
-    flex: 1 1 50%;
+    //border-top: 1px solid rgb(218, 216, 216);
+    border-bottom: 1px solid rgb(179, 179, 179);
+    display: block;  
+    margin-top: 5px;
+    margin-bottom: 5px;
     cursor: pointer;
+    width: 80%;
+    margin: auto;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 1.7vw;
+  }
+  p:first-child{
+    margin-top: 10px;
   }
 }
 
 // CHAPTER TITLE ROW
 .chaptitle-clicked{
-  background-color:  rgb(146, 57, 253);
-  color: whitesmoke;
-  border-radius: 12px;
-  border: none !important;
+  color:  rgb(146, 57, 253);
+  border-radius: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  //border: none !important;
+  font-style: oblique;
 }
 
 //---------- CHAPTER PAGES DECO
@@ -119,16 +128,18 @@
   width: 80vw;
   margin: auto;
   scroll-snap-align: end;
+  //box-shadow: 0 -5px 8px -8px;
+  margin-top: 10px;
 }
 
-.chapter-pages-wrapper{
+/* .chapter-pages-wrapper{
   width: 100%;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
   align-content: center;
   align-items: flex-start;
-}
+} */
 
 // LIST OF IMAGES OF CHAPTER
 .bookpage-chapter-page{
@@ -138,7 +149,11 @@
   margin-bottom: 1vh;
   max-height: 80vh;
   text-align: center;
-  box-shadow: 0 0 30px -10px grey;
+  //box-shadow: 0 0 8px -8px grey;
+  img{
+    width: 100%;
+    height: auto;
+  }
 }
 // TITLE OF DISPLAY CHAPTER
 .chaptitle-decor{

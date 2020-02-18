@@ -160,6 +160,7 @@
   animation: spin 2s linear infinite;
 }
 
+/* ;;;;;;;;;;  >>>>>> BOOK NAVIGATION*/
 .mangaListing {
   width: 100vw;
   margin: auto;
@@ -174,10 +175,61 @@
     li{
     @include listyle;
     font-family: 'Righteous', cursive;
-    font-size: 1.3em;
+    font-size: 1em;
   }
   }
 }
+
+.search-bar{
+  width: 100%;
+  text-align: center;
+  display: block;
+  margin-bottom: 8px;
+  form{
+    width: 90%;
+    margin: auto;
+    display:flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    align-content: center;
+    align-items: center;
+    input[type='search']{
+      margin: auto;
+      flex: 1 1 85%;
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+    button{
+      
+      flex: 1 1 auto;
+      @extend %gene-button;
+      padding: 0 !important;
+      background-color: rgb(3, 66, 85) !important;
+    }
+  }
+}
+
+
+.book-genre-navi{
+  width: 95%;
+  ul{
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom:5px;
+    li{
+      @include listyle;
+      font-size: 1.2vw;
+      margin-left: 10px;
+      margin-right: 10px;
+      margin-bottom: 5px;
+      margin-top: 2px;
+      font-weight: 550;
+      border-top: solid 1px black;
+      border-bottom: solid 1px black;
+    }
+  }
+}
+
 // ----- >>>> BOOK DISPLAY SSECTION
 #bookArea{
   width: 95%;
@@ -232,9 +284,17 @@
 }
 
 .book-display-loadmore-button{
-  
   button{
     @extend %gene-button;
     background-color: rgb(18, 184, 114);
   }
+}
+
+.loadmore-button{
+  @extend %gene-button;
+  background-color: rgb(18, 184, 114);
+}
+
+#genreDiv{
+  @extend .book-display-wrapper;
 }

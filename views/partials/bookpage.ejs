@@ -38,7 +38,8 @@ app:book-router    '{\r\n  "chapterlist": [\r\n    "Chapter 001  Question Genius
   <div class="bookpage-chaplist"> <!--BOOK PAGE CHAP LIST-->
     <% for(let chap of bookdetail.chaplist){%>
       <% var chapprefix = bookdetail.title + '/' + chap%>
-      <p onclick="DisplayChapterContent(event ,'<%= chapprefix%>')"><%= chap%></p>
+      <p onclick="DisplayChapterContent(event ,'<%= chapprefix%>')"><%= chap%> </p>
+      
     <%}%>
   </div> <!--BOOK PAGE CHAP LIST-->
 
