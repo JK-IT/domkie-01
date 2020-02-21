@@ -1,10 +1,69 @@
-window.onload = function(event){
-  //find which section is loaded to load more either manga or comic
-  var secid = this.document.getElementById('mangaSection');
-  if(secid){
-    /**===> this is manga page */
-    this.LoadBook('manga', 'all');
-  }
+window.onload = function(event){  
+  this.LoadMangaPage();
+}
+
+// ------ load homepage
+function LoadMangaPage(){
+  let fetchurl = window.origin + '/manga';
+  fetch(fetchurl, {
+    method: 'GET',
+    credentials: 'include'
+  })
+  .then(resp=>{
+    if(resp.ok){
+      //render the page
+      return resp.json();
+    }
+  })
+  .then(resobj=>{
+    let rendersec = document.getElementById('bodyRenderSection');
+    if(resobj.success){
+      while(rendersec.lastElementChild){
+        rendersec.removeChild(rendersec.firstElementChild);
+      } 
+      rendersec.insertAdjacentHTML('beforeend', resobj.str);
+      this.LoadBook('manga', 'all');
+    } else {
+      //window.location.replace('/500');
+      //throw new Error('Failed to Connect to Server');
+      let p = document.createElement('p');
+      p.innerHTML = 'Opps!!! Something goes wrong. Please readload the page.';
+      rendersec.appendChild(p);
+    }
+  })
+  .catch(err=>{
+    console.log('LOAD MANGA PAGE ERR ' + err);
+  });
+}// END LOAD MANGA PAGE
+
+// ----- load comic page
+function LoadComicPage(){
+  let url = window.origin + '/comic';
+  fetch(url, {
+    method: 'GET',
+    credentials: 'include'
+  })
+  .then(resp=>{
+    if(resp.ok){
+      return resp.json();
+    }
+  })
+  .then(resobj=>{
+    let rendersec = document.getElementById('bodyRenderSection');
+    if(resobj.success){
+      while(rendersec.lastElementChild){
+        rendersec.removeChild(rendersec.lastElementChild);
+      }
+      rendersec.insertAdjacentHTML('beforeend',resobj.str);
+    } else {
+      let p = document.createElement('p');
+      p.innerHTML = 'Opps!!! Something goes wrong. Please readload the page.';
+      rendersec.appendChild(p);
+    }
+  })
+  .catch(err=>{
+    console.log('COMIC PAGE LOAD ERR ' + err);
+  })
 }
 
 //------load book by subtype on homepage
@@ -16,8 +75,8 @@ function LoadBook(type, subtype, inkey=null){
   } 
   fetch(fetchurl, {
     method: 'GET',
-    credentials: "include",
-    cache: "no-cache"
+    credentials: "include"
+    //cache: "no-cache"
   }).then(resp=>{
     return resp.json();
   }).then(loadres =>{
@@ -209,6 +268,20 @@ function DisplayChapterContent(event,chapprefix){
   
 } //======>>>>>> DISPLAY CHAPTER CONTENT
 
+// --- book type navigations
+function BookTypeNavi(e, type){
+  e.preventDefault();
+  if(type == 'manga'){
+    e.target.setAttribute('style', 'color: rgb(209, 21, 146)');
+    (e.target.nextElementSibling).removeAttribute('style');
+    LoadMangaPage();
+  }else if(type == 'comic'){
+    e.target.setAttribute('style', 'color:rgb(0,98,255)');
+    (e.target.previousElementSibling).removeAttribute('style');
+    LoadComicPage();
+  }
+}
+
 // a function that load book by subtype
 function SortbySubtype(e, type, subtype, inkey= null){
   e.preventDefault();
@@ -353,15 +426,6 @@ function SearchBook(e){
       console.error('getting error while search for the book ' + err);
     });
 } // END BOOK SEARCHING FUNCTION
-
-function ClearSearch(e){
-  var seresdiv = document.getElementsByClassName('search-result')[0];
-  if(seresdiv.childElementCount != 0){
-    while(seresdiv.lastElementChild){
-      seresdiv.removeChild(seresdiv.lastElementChild);
-    }
-  }
-}
 
 var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 

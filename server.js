@@ -110,32 +110,60 @@ app.use((req, res, next)=>{
   next();
 });
 
-
+/**General handling */
 app.get('/', (req, res)=>{
+  res.render('index');
+}); // END GENERAL HANDLING
+
+/* Fetching manga homepage */
+app.get('/manga', (req,res)=>{
   (async function(){
     kaw.HomepageManga()
     .then(introMangaBooks =>{
-      if(!introMangaBooks){return res.redirect('500')}
-
-      ejs.renderFile('views/partials/manga.ejs', {introManga: introMangaBooks})
-      .then(manga=>{
-        return ejs.renderFile('views/partials/homepage.ejs', {page: manga})
-        
-      }).then(homepage=>{
-        res.render('index', {renderpage: homepage});
-      })
-      .catch(pageerr=>{
-        apperr(pageerr);
-      });
-
+      return ejs.renderFile('views/partials/manga.ejs', {introManga: introMangaBooks});
     })
-    
+    .then(mangapge=>{
+      return ejs.renderFile('views/partials/homepage.ejs', {page: mangapge});
+      
+    }).then(homepagestr=>{
+      //this is where u return str from rendering the complete mangahomepage
+      res.end(JSON.stringify({
+        success: true,
+        str: homepagestr
+      }));
+    })
+    .catch(pageerr=>{
+      apperr('ERROR WHILE TRY TO GET MANGA HOMEPAGE ' + pageerr);
+      res.end(JSON.stringify({
+        success: false
+      }));
+    });
   })();
 });
 
+/* Fetching comic homepage */
+app.get('/comic', (req,res)=>{
+  ejs.renderFile('views/partials/comic.ejs')
+  .then(comstr=>{
+    return ejs.renderFile('views/partials/homepage.ejs', {page: comstr});
+  })
+  .then(homepagestr=>{
+    res.end(JSON.stringify({
+      success: true,
+      str: homepagestr
+    }));
+  })
+  .catch(rendererr=>{
+    apperr('ERROR RENDING COMIC HOMEPAGE ' + rendererr);
+    res.end(JSON.stringify({
+      success: false
+    }));
+  });
+});
+
 app.get('/404', (req, res)=>{
-  res.render('404')
-})
+  res.render('404');
+});
 
 app.get('/500', (req, res)=>{
   res.render('500')
