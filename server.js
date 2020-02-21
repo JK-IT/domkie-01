@@ -122,14 +122,14 @@ app.get('/manga', (req,res)=>{
     .then(introMangaBooks =>{
       return ejs.renderFile('views/partials/manga.ejs', {introManga: introMangaBooks});
     })
-    .then(mangapge=>{
+    /* .then(mangapge=>{
       return ejs.renderFile('views/partials/homepage.ejs', {page: mangapge});
       
-    }).then(homepagestr=>{
+    }) */.then(manpagestr=>{
       //this is where u return str from rendering the complete mangahomepage
       res.end(JSON.stringify({
         success: true,
-        str: homepagestr
+        str: manpagestr
       }));
     })
     .catch(pageerr=>{
@@ -144,13 +144,13 @@ app.get('/manga', (req,res)=>{
 /* Fetching comic homepage */
 app.get('/comic', (req,res)=>{
   ejs.renderFile('views/partials/comic.ejs')
-  .then(comstr=>{
+  /* .then(comstr=>{
     return ejs.renderFile('views/partials/homepage.ejs', {page: comstr});
-  })
-  .then(homepagestr=>{
+  }) */
+  .then(compagestr=>{
     res.end(JSON.stringify({
       success: true,
-      str: homepagestr
+      str: compagestr
     }));
   })
   .catch(rendererr=>{

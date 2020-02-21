@@ -27,11 +27,9 @@
       <%if(typeof showBanner == 'undefined'){%>
     <%- include('./partials/creator-banner.ejs')%>
       <%}%>
-    <!--
-      renderpage from ejs
-    -->
     <section id="bodyRenderSection">
-      <video id="video" playsinline="" muted="" autoplay="" loop="" data-silent="true" src="https://cdn.dribbble.com/users/563824/screenshots/3633228/untitled-5.gif?vid=1">
+      <%- include('./partials/homepage.ejs')%>
+      <video id="rootloading" playsinline="" muted="" autoplay="" loop="" data-silent="true" src="https://cdn.dribbble.com/users/563824/screenshots/3633228/untitled-5.gif?vid=1">
       </video>
     </section>
     <br>

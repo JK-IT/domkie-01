@@ -4,7 +4,7 @@ window.onload = function(event){
 
 // ------ load homepage
 function LoadMangaPage(){
-  let fetchurl = window.origin + '/manga';
+  var fetchurl = window.origin + '/manga';
   fetch(fetchurl, {
     method: 'GET',
     credentials: 'include'
@@ -16,19 +16,22 @@ function LoadMangaPage(){
     }
   })
   .then(resobj=>{
-    let rendersec = document.getElementById('bodyRenderSection');
+    let placeholder = document.getElementById('bodyPlaceHolder');
+    if(document.getElementById('rootloading')){
+      document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootloading'));
+    } 
     if(resobj.success){
-      while(rendersec.lastElementChild){
-        rendersec.removeChild(rendersec.firstElementChild);
+      while(placeholder.lastElementChild){
+        placeholder.removeChild(placeholder.firstElementChild);
       } 
-      rendersec.insertAdjacentHTML('beforeend', resobj.str);
+      placeholder.insertAdjacentHTML('beforeend', resobj.str);
       this.LoadBook('manga', 'all');
     } else {
       //window.location.replace('/500');
       //throw new Error('Failed to Connect to Server');
       let p = document.createElement('p');
       p.innerHTML = 'Opps!!! Something goes wrong. Please readload the page.';
-      rendersec.appendChild(p);
+      placeholder.appendChild(p);
     }
   })
   .catch(err=>{
@@ -49,21 +52,24 @@ function LoadComicPage(){
     }
   })
   .then(resobj=>{
-    let rendersec = document.getElementById('bodyRenderSection');
+    let placeholder = document.getElementById('bodyPlaceHolder');
+    if(document.getElementById('rootloading')){
+      document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootloading'));
+    } 
     if(resobj.success){
-      while(rendersec.lastElementChild){
-        rendersec.removeChild(rendersec.lastElementChild);
+      while(placeholder.lastElementChild){
+        placeholder.removeChild(placeholder.lastElementChild);
       }
-      rendersec.insertAdjacentHTML('beforeend',resobj.str);
+      placeholder.insertAdjacentHTML('beforeend',resobj.str);
     } else {
       let p = document.createElement('p');
       p.innerHTML = 'Opps!!! Something goes wrong. Please readload the page.';
-      rendersec.appendChild(p);
+      placeholder.appendChild(p);
     }
   })
   .catch(err=>{
     console.log('COMIC PAGE LOAD ERR ' + err);
-  })
+  });
 }
 
 //------load book by subtype on homepage
