@@ -15,6 +15,10 @@
   margin: auto;
 }
 
+#bodyRenderSection{
+  min-height: 85vh;
+}
+
 #bodyNaviLinks{
   
   ul li{
@@ -49,6 +53,7 @@
 
 #bookSectionCoverImg{
   height: 50vw;
+  width: 100vw;
   overflow: hidden;
   img{
     display: block;
@@ -307,4 +312,43 @@
 
 #genreDiv{
   @extend .book-display-wrapper;
+}
+
+/* LOADING SPIN DECO*/
+#rootLoading{
+  width: 50vw;
+  height: 40vh;
+  margin: auto;
+}
+
+.preloader {
+  color:#ffffff;
+  width:100px;
+  height:100px;
+  margin: auto;
+  opacity:1;
+  margin-top: 10%;
+  display: block;
+  background:#ea4545;
+  -webkit-animation: preloader 1.5s ease-in-out infinite alternate;
+  animation: preloader 1.5s ease-in-out infinite alternate;
+}
+@keyframes preloader {
+  from {transform: rotate(0deg) scale(1,1);border-radius:0px; }
+  50%{
+    background: rgb(152, 81, 238);
+  }
+  to {transform: rotate(720deg) scale(0.5, 0.5);
+    border-radius:50px;
+    background: rgb(1, 152, 1);
+  }
+}
+@-webkit-keyframes preloader {
+  from {-webkit-transform: rotate(0deg) scale(1, 1);border-radius:0px;
+    }
+  50%{
+    background: rgb(152, 81, 238);
+  }
+  to {-webkit-transform: rotate(720deg) scale(0.5, 0.5);border-radius:50px;
+    background: rgb(1, 152, 1);}
 }

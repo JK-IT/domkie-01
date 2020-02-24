@@ -4,6 +4,16 @@ window.onload = function(event){
 
 // ------ load homepage
 function LoadMangaPage(){
+  if( document.getElementById('bodyPlaceHolder').children.length != 0){
+    while(document.getElementById('bodyPlaceHolder').lastElementChild){
+      document.getElementById('bodyPlaceHolder').removeChild(document.getElementById('bodyPlaceHolder').firstElementChild);
+    }
+  }
+  if(!document.getElementById('rootLoading')){
+    var loadiv = GenLoadingDiv();
+    console.log(loadiv);
+    document.getElementById('bodyRenderSection').appendChild(loadiv);
+  }
   var fetchurl = window.origin + '/manga';
   fetch(fetchurl, {
     method: 'GET',
@@ -17,8 +27,8 @@ function LoadMangaPage(){
   })
   .then(resobj=>{
     let placeholder = document.getElementById('bodyPlaceHolder');
-    if(document.getElementById('rootloading')){
-      document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootloading'));
+    if(document.getElementById('rootLoading')){
+      document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootLoading'));
     } 
     if(resobj.success){
       while(placeholder.lastElementChild){
@@ -137,7 +147,39 @@ function LoadBook(type, subtype, inkey=null){
 function DisplayBook(type, title){
   //console.log(type + ' ---- ' + title);
   var name = title.toLowerCase();
-  window.location.href = window.origin + '/book/open?type=' + type + '&title=' + title;
+  var url = window.origin + '/book/open?type=' + type + '&title=' + title;
+  fetch(url, {
+    method: 'GET',
+    credentials: "include"
+  })
+  .then(resp=>{
+    return resp.json();
+  })
+  .then(resobj=>{
+
+    if(resobj.success){
+      //
+      var rendersection = document.getElementById('bodyRenderSection');
+      while(rendersection.lastElementChild){
+        rendersection.removeChild(rendersection.firstElementChild);
+      }
+      rendersection.insertAdjacentHTML('beforeend', resobj.str);
+      window.scrollTo(0,0)
+      document.getElementById('headBar').scrollIntoView;
+    }else {
+      throw new Error('Error reply from server.');
+    }
+  })
+  .catch(err=>{
+    console.log(err);
+    var placeholder = document.getElementById('bodyPlaceHolder');
+    while(placeholder.lastElementChild){
+      placeholder.removeChild(placeholder.firstElementChild);
+    }
+    let p = document.createElement('p');
+    p.innerHTML = 'Opps!!! Something goes wrong. Please reload the page';
+    placeholder.appendChild(p);
+  })
 } // =======>>>>>>> DISPLAY BOOK FUNCTION
 
 //-----display chapter content
@@ -432,6 +474,16 @@ function SearchBook(e){
       console.error('getting error while search for the book ' + err);
     });
 } // END BOOK SEARCHING FUNCTION
+
+// use this to generate PRELOADING FUNCTION
+function GenLoadingDiv(){
+  var div = document.createElement('div');
+  div.id = 'rootLoading';
+  var preload = document.createElement('div');
+  preload.classList.add('preloader');
+  div.appendChild(preload);
+  return div;
+} // END GENERATING PRELOADING FUNCTION
 
 var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 

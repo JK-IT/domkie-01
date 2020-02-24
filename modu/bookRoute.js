@@ -41,7 +41,7 @@ book.get('/fetch/load/:type', (req, res)=>{
   
 }); // END FETCHING BOOK WITH TYPE AND SUBTYPE
 
-/**=========== >>>  OPEN BOOK WITH TITLE */
+/**=========== >>> FETCH  OPEN BOOK WITH TITLE */
 book.get('/open', (req, res)=>{
   var type = req.query.type;
   var title = req.query.title;
@@ -49,10 +49,16 @@ book.get('/open', (req, res)=>{
   kaw.OpenBook(type, title).then(bookdetail=>{
     ejs.renderFile('views/partials/bookpage.ejs', {bookdetail: bookdetail})
     .then(respage=>{
-      res.render('index', {renderpage: respage})
+      //res.render('index', {renderpage: respage})
+      res.end(JSON.stringify({
+        success:true,
+        str: respage
+      }))
     }).catch(rendererr=>{
       bookerr('RENDER BOOKPAGE ERR ---' + rendererr);
-      
+      res.end(JSON.stringify({
+        success: false
+      }))
     });
   });
   
