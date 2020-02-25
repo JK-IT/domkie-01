@@ -58,7 +58,6 @@ var limit = null;
 var kaw = {};
 
 
-
 if(process.env.NODE_ENV == 'production'){
   limit = 20;
 } else {
@@ -388,30 +387,6 @@ kaw.BookSearching = function(type, name, inarray, inkey = null){
   });
 }; // END BOOK SEARCHING FUNCTION
 
-
-kaw.GetBookByPublisher = function(genre, starkey = null){
-  var param = {
-    TableName: 'book_table',
-    IndexName: 'publisher-index',
-    ExpressionAttributeNames: {'#g': 'publisher'},
-    ExpressionAttributeValues: {':gen': {'S': genre}},
-    KeyConditionExpression: '#g = :gen',
-    ExclusiveStartKey: starkey,
-    //Limit: 3,
-    ReturnConsumedCapacity: 'INDEXES'
-  }
-  return new Promise((resolve, reject)=>{
-    dynamo.query(param, (err, data)=>{
-      if(err){
-        dymoerr('Get Book Publisher ' + err);
-        reject('false');
-      } else {
-        dymolog(util.inspect(data, true, 5, true));
-        resolve(data);
-      }
-    })
-  })
-}
 
 // using cognito identity to get temporary credentials
 kaw.GetTempCred = function(iktok){

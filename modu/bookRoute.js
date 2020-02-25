@@ -164,38 +164,6 @@ book.get('/search/:booktype', (req, res)=>{
   
 }); // END BOOK SEARCHING
 
-book.get('/list/:type/:publisher', (req, res)=>{
-  var publisher =  req.params.publisher;
-  booklog('publisher of book ' + publisher);
-  var xtrainfo = {publisher: null};
-  if(req.params.type == 'manga'){
-    xtrainfo.booktype = 'manga';
-    xtrainfo.idtag = 'mangaListing';
-    xtrainfo.publisher = publisher;
-  } else {
-    xtrainfo.booktype = 'comic';
-    xtrainfo.idtag = 'comicListing';
-    xtrainfo.publisher = publisher;
-  }
-  kaw.GetBookByPublisher(publisher, null)
-    .then(bookdata =>{
-      ejs.renderFile('views/partials/miniBookDisplay.ejs', {bookdata: bookdata, xtra: xtrainfo})
-        .then(str =>{
-          res.setHeader('Content-Type', 'application/json');
-          res.send(JSON.stringify({added: str}))
-          
-        })
-        .catch(err =>{
-          bookerr('error while rendering book by publisher ' + err);
-          
-        });
-    })
-    .catch(err => {
-      bookerr('error while listing book by publisher ');
-      
-    });
-});
-
 /*
   helper function
 
