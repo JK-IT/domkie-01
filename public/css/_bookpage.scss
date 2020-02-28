@@ -130,6 +130,7 @@
   scroll-snap-align: end;
   //box-shadow: 0 -5px 8px -8px;
   margin-top: 10px;
+  
 }
 
 /* .chapter-pages-wrapper{
@@ -147,9 +148,10 @@
   margin: auto;
   margin-top: 1vh;
   margin-bottom: 1vh;
-  max-height: 80vh;
+  //max-height: 80vh;
   text-align: center;
-  //box-shadow: 0 0 8px -8px grey;
+  padding-bottom: 10px;
+  box-shadow: 0 8px 8px -8px grey;
   img{
     width: 100%;
     height: auto;

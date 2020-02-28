@@ -2,10 +2,9 @@ const exp = require('express');
 const book = exp.Router();
 const util = require('util');
 const ejs = require('ejs');
-const kaw = require('./kaw')
+const kaw = require('./kaw');
 const debug = require('./debug');
-const memcache = require('memory-cache');
-let booklog = debug.extend('book-router')
+let booklog = debug.extend('book-router');
 let bookerr = debug.extend('book-router-error');
 
 /*====> FETCHING BOOK TYPE AND SUBTYPE */

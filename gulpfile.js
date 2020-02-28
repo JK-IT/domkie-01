@@ -12,19 +12,42 @@ gu.task('mini-rev', function(){
         console.log(`${details.name}: ${details.stats.minifiedSize}`);
       }))
     .pipe(rev.revision())
-    .pipe(gu.dest('../domkie-production/public/css/'));
+    .pipe(gu.dest('../dkpro/public/css/'));
 
-    gu.src('./public/js/main.js')
+    return gu.src('./public/js/main.js')
     .pipe( jsmini())
     .pipe(rev.revision())
-    .pipe(gu.dest('../domkie-production/public/js'))
+    .pipe(gu.dest('../dkpro/public/js'));
     
-    return gu.src('./views/index.ejs').pipe(inje(gu.src(['../domkie-production/public/js/*.js', '../domkie-production/public/css/*.css'], {read: false})))
-    .pipe(gu.dest('../domkie-production/views/'))
-})
+});
+
+gu.task('inject', function(){
+    return gu.src('./views/index.ejs').pipe(inje(gu.src(['../dkpro/public/css/*.css'], {read: false}),{ignorePath:'../dkpro/public/', addRootSlash: false}))
+    .pipe(inje(gu.src(['../dkpro/public/js/*.js'], {read: false}), {
+        ignorePath: '../dkpro/public/', addRootSlash: false,
+        transform: function(filepath){
+            return '<script async defer type="text/javascript" src="' + filepath + '"></script>';
+        }
+    }))
+    .pipe(gu.dest('../dkpro/views/'));
+
+});
 
 gu.task('copy', function(){
-    return gu.src(['./modu/*','./public/img/*','./views/partials/*','./package.json']).pipe(gu.dest('../domkie-production'))
-})
+    gu.src(['./modu/*'])
+    .pipe(gu.dest('../dkpro/modu/'));
 
-gu.task('default')
+    gu.src([ './public/img/*'])
+    .pipe(gu.dest('../dkpro/public/img/'));
+
+    gu.src(['./views/partials/*'])
+    .pipe(gu.dest('../dkpro/views/partials/'));
+
+    gu.src(['./views/404.ejs','./views/500.ejs'])
+    .pipe(gu.dest('../dkpro/views/'));
+
+    return gu.src(['./package.json', './server.js'])
+    .pipe(gu.dest('../dkpro/'));
+});
+
+gu.task('default', gu.series(['mini-rev','inject','copy']));

@@ -36,7 +36,6 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "helmet": "^3.21.1",
-    "memory-cache": "^0.2.0",
     "memorystore": "^1.6.1",
     "node-fetch": "^2.6.0",
     "querystring": "^0.2.0",
@@ -51,12 +50,10 @@
     "gulp-clean-css": "^4.2.0",
     "gulp-cli": "^2.2.0",
     "gulp-inject": "^5.0.5",
-    "gulp-rev": "^9.0.0",
     "gulp-rev-all": "^2.0.2",
     "gulp-uglify-es": "^2.0.0",
     "morgan": "^1.9.1",
     "nodemon": "^1.19.4",
-    "uglify-js": "^3.6.0",
     "util": "^0.12.1"
   }
 }

@@ -1,20 +1,52 @@
 window.onload = function(event){  
-  this.LoadMangaPage();
-}
+  this.console.log('loading...');
+  this.console.log(window.sessionStorage);
+  if(window.sessionStorage.length == 0){
+    this.LoadMangaPage(true);
+  } else {
+    if(window.sessionStorage.path == '/manga'){
+      this.LoadMangaPage(true);
+    } else if(window.sessionStorage.path == '/comic'){
+      this.LoadComicPage(true);
+    } else if(window.sessionStorage.path == '/book/open'){
+      this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title);
+    }
+  }
+};
 
+window.onbeforeunload = function(event){
+  //event.preventDefault();
+  //event.returnValue = '';
+  //this.console.log('before unload');
+  //this.console.log(window.sessionStorage);
+};
+
+window.onunload = function(event){
+  //this.console.log('unload');
+  this.console.log(window.sessionStorage);
+  window.location.replace(window.origin + '/');
+};
 // ------ load homepage
-function LoadMangaPage(){
-  if( document.getElementById('bodyPlaceHolder').children.length != 0){
+function LoadMangaPage(history = false){
+  if(document.getElementById('bodyPlaceHolder') && document.getElementById('bodyPlaceHolder').children.length != 0){
     while(document.getElementById('bodyPlaceHolder').lastElementChild){
       document.getElementById('bodyPlaceHolder').removeChild(document.getElementById('bodyPlaceHolder').firstElementChild);
     }
   }
   if(!document.getElementById('rootLoading')){
     var loadiv = GenLoadingDiv();
-    console.log(loadiv);
+    //console.log(loadiv);
     document.getElementById('bodyRenderSection').appendChild(loadiv);
   }
+  
   var fetchurl = window.origin + '/manga';
+  if(history){
+    window.history.pushState(null, null, fetchurl);
+    window.sessionStorage.setItem('path', window.location.pathname);
+    window.sessionStorage.setItem('url', window.location.href);
+    //console.log(window.sessionStorage);
+  }
+
   fetch(fetchurl, {
     method: 'GET',
     credentials: 'include'
@@ -50,8 +82,14 @@ function LoadMangaPage(){
 }// END LOAD MANGA PAGE
 
 // ----- load comic page
-function LoadComicPage(){
+function LoadComicPage(history = false){
   let url = window.origin + '/comic';
+  if(history){
+    window.history.pushState(null, null, url);
+    window.sessionStorage.setItem('path', window.location.pathname);
+    window.sessionStorage.setItem('url', window.location.href);
+    //console.log(window.sessionStorage);
+  }
   fetch(url, {
     method: 'GET',
     credentials: 'include'
@@ -63,8 +101,8 @@ function LoadComicPage(){
   })
   .then(resobj=>{
     let placeholder = document.getElementById('bodyPlaceHolder');
-    if(document.getElementById('rootloading')){
-      document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootloading'));
+    if(document.getElementById('rootLoading')){
+      document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootLoading'));
     } 
     if(resobj.success){
       while(placeholder.lastElementChild){
@@ -148,6 +186,12 @@ function DisplayBook(type, title){
   //console.log(type + ' ---- ' + title);
   var name = title.toLowerCase();
   var url = window.origin + '/book/open?type=' + type + '&title=' + title;
+  window.history.pushState(null,null, url);
+  window.sessionStorage.setItem('path', window.location.pathname);
+  window.sessionStorage.setItem('type', type);
+  window.sessionStorage.setItem('title', title);
+  window.sessionStorage.removeItem('url');
+  //console.log(window.sessionStorage);
   fetch(url, {
     method: 'GET',
     credentials: "include"
@@ -164,8 +208,8 @@ function DisplayBook(type, title){
         rendersection.removeChild(rendersection.firstElementChild);
       }
       rendersection.insertAdjacentHTML('beforeend', resobj.str);
-      window.scrollTo(0,0)
-      document.getElementById('headBar').scrollIntoView;
+      window.scrollTo(0,0);
+      document.getElementById('headBar').scrollIntoView();
     }else {
       throw new Error('Error reply from server.');
     }
@@ -179,7 +223,7 @@ function DisplayBook(type, title){
     let p = document.createElement('p');
     p.innerHTML = 'Opps!!! Something goes wrong. Please reload the page';
     placeholder.appendChild(p);
-  })
+  });
 } // =======>>>>>>> DISPLAY BOOK FUNCTION
 
 //-----display chapter content
@@ -251,43 +295,42 @@ function DisplayChapterContent(event,chapprefix){
     //chap title
     let h3 = document.createElement('h3');
     h3.innerHTML = inchap;
-    h3.classList.add('chaptitle-decor')
+    h3.classList.add('chaptitle-decor');
     wrapdiv.appendChild(h3);
 
     //**************  button 
     let butdiv = document.createElement('div');
-    butdiv.classList.add('bookpage-chapbutt-navi')
+    butdiv.classList.add('bookpage-chapbutt-navi');
     let prevbutt = document.createElement('button');
     if(prevchaptitle == ''){
       
-      prevbutt.setAttribute('disabled', true);
+      prevbutt.setAttribute('disabled', 'true');
     }else {
       prevbutt.classList.add('chapbutt-navi');
       let prechapprefix = booktitle + '/' + prevchaptitle;
       prevbutt.addEventListener('click', function(e){
-        e.preventDefault;
-        console.log('prev chapter -- ' + prevchaptitle);
-        DisplayChapterContent(event, prechapprefix)();
-      })
+        e.preventDefault();
+        //console.log('prev chapter -- ' + prevchaptitle);
+        DisplayChapterContent.call(null,event, prechapprefix);
+      });
     }
     prevbutt.innerHTML = "Previous Chapter";
-    butdiv.appendChild(prevbutt)
+    butdiv.appendChild(prevbutt);
 
     let nexbutt = document.createElement('button');
     if(nexchaptitle == ''){
-      
-      nexbutt.setAttribute('disabled', true);
+      nexbutt.setAttribute('disabled', 'true');
     }else {
       nexbutt.classList.add('chapbutt-navi');
       let nexchapprefix = booktitle +'/' +nexchaptitle;
       nexbutt.addEventListener('click', function(e){
-        e.preventDefault;
+        e.preventDefault();
         console.log('next chapter -- ' + nexchapprefix);
-        DisplayChapterContent(event, nexchapprefix)();
+        DisplayChapterContent.call(null,event, nexchapprefix);
       });
     }
     nexbutt.innerHTML = "Next Chapter";
-    butdiv.appendChild(nexbutt)
+    butdiv.appendChild(nexbutt);
     wrapdiv.appendChild(butdiv);
     //************ END BUTTON */
 
@@ -300,37 +343,37 @@ function DisplayChapterContent(event,chapprefix){
         img.src = resobj.chapinfo.s3link + chapkey;
         imgdivs.appendChild(img);
       }
-      wrapdiv.appendChild(imgdivs)
+      wrapdiv.appendChild(imgdivs);
       chapcontainer.appendChild(wrapdiv); 
       
-      //chapcontainer.scrollIntoView(true);
-      window.scrollTo(0, document.body.scrollHeight);
+      chapcontainer.scrollIntoView(true);
+      //window.scrollTo(0, document.body.scrollHeight);
     } else {
       let p = document.createElement('p');
-      p.innerHTML = "Failed to load chapter. Please reload the page!!!"
+      p.innerHTML = "Failed to load chapter. Please reload the page!!!";
       chapcontainer.appendChild(p);
     }
   }).catch(err=>{
     console.log('DISPLAY CHAPTER CONTENT ERROR ' + err);
-  })
+  });
   
 } //======>>>>>> DISPLAY CHAPTER CONTENT
 
-// --- book type navigations
+// /* --- book type navigations */
 function BookTypeNavi(e, type){
   e.preventDefault();
   if(type == 'manga'){
     e.target.setAttribute('style', 'color: rgb(209, 21, 146)');
     (e.target.nextElementSibling).removeAttribute('style');
-    LoadMangaPage();
+    LoadMangaPage(true);
   }else if(type == 'comic'){
     e.target.setAttribute('style', 'color:rgb(0,98,255)');
     (e.target.previousElementSibling).removeAttribute('style');
-    LoadComicPage();
-  }
-}
+    LoadComicPage(true);
+  } 
+} //END BOOK TYPE NAVIGATION
 
-// a function that load book by subtype
+// /* a function that load book by subtype */
 function SortbySubtype(e, type, subtype, inkey= null){
   e.preventDefault();
   //console.log(e.currentTarget);
@@ -342,7 +385,7 @@ function SortbySubtype(e, type, subtype, inkey= null){
   for(let li of genrenavi.children){
     li.removeAttribute('style');
   }
-  e.currentTarget.setAttribute('style', 'color: brown;font-size: 1.3em;')
+  e.currentTarget.setAttribute('style', 'color: brown;font-size: 1.3em;');
   //clear current children of book area
   let bookarea = document.getElementById('bookArea');
   while(bookarea.lastElementChild){
@@ -364,7 +407,7 @@ function SortbyGenre(e, type, genre, inkey = null){
     li.removeAttribute('style');
   }
   let subnavi = document.getElementById('mangaNaviUl');
-  subnavi.children[0].setAttribute('style', 'color: brown;font-size: 1.3em;')
+  subnavi.children[0].setAttribute('style', 'color: brown;font-size: 1.3em;');
   for(let i = 1; i < subnavi.children.length; i++){
     subnavi.children[i].removeAttribute('style');
     
@@ -485,6 +528,24 @@ function GenLoadingDiv(){
   return div;
 } // END GENERATING PRELOADING FUNCTION
 
+/**HANDLING POPSTATE WHEN USER CLICK BACK BUTTON */
+window.onpopstate = function (event){
+  //this.alert(window.location);
+  this.console.log(window.sessionStorage);
+  this.console.log(window.location);
+
+  if(window.location.pathname == '/manga'){
+    this.LoadMangaPage(false);
+  } else if(window.location.pathname == '/comic'){
+    this.LoadComicPage(false);
+  } else if (window.location.pathname == '/book/open'){
+    //this.DisplayBook.call(null, )
+  } else {
+    this.LoadMangaPage(false);
+  }
+}; //END HANDLING POPSTATE OF WINDOWS 
+
+
 var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 function Login(e){
@@ -559,7 +620,7 @@ function Signup(e){
 //upload with presignedURl
 function UploadListing(e, usersub){
   e.preventDefault();
-  var oriform = document.forms['uploadListingForm']
+  var oriform = document.forms['uploadListingForm'];
   var errspan = document.getElementById('listingFormWarning');
   errspan.classList.add('hidden');
   //var elebeforelast = oriform.lastElementChild.previousElementSibling;
