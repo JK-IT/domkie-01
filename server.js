@@ -19,44 +19,53 @@ var port = 8008;
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('trust proxy', 1); //setting this so u can set session or cookie when u have nodejs behind a proxy
-
-if(process.env.NODE_ENV == 'production'){
-  app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: 43200000, //half of a day
-    setHeaders: function(res, path, stat){
-      
-    }
-  }));
-} else {
-  app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: 0, //half of a day
-    setHeaders: function(res, path, stat){
-      
-    }
-  }));
-}
-
 app.use(helmet());
 app.use(bdpar.json());
 app.use(bdpar.urlencoded({extended:false}));
-app.use ((req, res, next)=>{
-  if(process.env.NODE_ENV == 'production'){
+app.use(cors());
+
+if(process.env.NODE_ENV == 'production'){
+  app.use(express.static(path.join(__dirname, 'public'), {
+    //maxAge: 43200000, //half of a day
+    etag: true,
+    lastModified: true,
+    setHeaders: function(res, path){
+      var hashRegex = new RegExp('\\.[0-9a-f]{8}\\.');
+      if(path.endsWith('.html')){
+        res.setHeader('Cache-Control', 'no-cache');
+      } else if(hashRegex.test(path)){
+        res.setHeader('Cache-Control', 'max-age=43200000');
+      }
+    }
+  }));
+  app.use((req,res,next)=>{
+    //later inspect req url to get pathname for cache control
     res.set({
-      'Cache-Control': 'public',
+      'Cache-Control': 'public'
     });
     res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user";
     res.locals.logouturl = 'https://domkie.com';
-  } else {
+    next();
+  })
+} else {
+  app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: 0, //half of a day
+    setHeaders: function(res, path){
+      if(path.endsWith('.html')){
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  }));
+  app.use((req, res, next)=>{
     res.set({
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-store'
     });
     res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user";
     res.locals.logouturl = 'http://localhost:8008';
-  }
-  next();
-});
-app.use(cors());
-
+    next();
+  })
+}
+/** dealing with COOKIE AND SESSION STORE */
 var sess={
   secret: 'bokiesectcat',
   cookie:{path: '/', sameSite: 'lax'},
@@ -75,6 +84,7 @@ if(process.env.NODE_ENV != 'production'){
   port = process.env.PORT || 5500;
 }
 app.use(exsession(sess));
+
 app.use((req, res, next)=>{
   //applog('Request going through here');
   //applog(req.session.id);
@@ -109,6 +119,8 @@ app.use((req, res, next)=>{
   }
   next();
 });
+//DONE WITH COOKIE AND SESSION STORE
+
 
 /**General handling */
 app.get('/', (req, res)=>{

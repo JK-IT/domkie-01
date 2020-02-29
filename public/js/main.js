@@ -1,6 +1,6 @@
 window.onload = function(event){  
-  this.console.log('loading...');
-  this.console.log(window.sessionStorage);
+  /* this.console.log('loading...');
+  this.console.log(window.sessionStorage); */
   if(window.sessionStorage.length == 0){
     this.LoadMangaPage(true);
   } else {
@@ -22,17 +22,21 @@ window.onbeforeunload = function(event){
 };
 
 window.onunload = function(event){
-  //this.console.log('unload');
-  this.console.log(window.sessionStorage);
-  window.location.replace(window.origin + '/');
+  /* this.console.log('unload');
+  this.console.log(window.sessionStorage); */
+  window.location.assign(window.origin + '/');
 };
+
+/**Calling to Root  */
+function RootLink(){
+  window.sessionStorage.clear();
+  window.location.assign(window.origin + '/');
+}
+
 // ------ load homepage
 function LoadMangaPage(history = false){
-  if(document.getElementById('bodyPlaceHolder') && document.getElementById('bodyPlaceHolder').children.length != 0){
-    while(document.getElementById('bodyPlaceHolder').lastElementChild){
-      document.getElementById('bodyPlaceHolder').removeChild(document.getElementById('bodyPlaceHolder').firstElementChild);
-    }
-  }
+
+  ChildRemove('bodyPlaceHolder'); // remove all children
   if(!document.getElementById('rootLoading')){
     var loadiv = GenLoadingDiv();
     //console.log(loadiv);
@@ -83,6 +87,12 @@ function LoadMangaPage(history = false){
 
 // ----- load comic page
 function LoadComicPage(history = false){
+  ChildRemove('bodyPlaceHolder'); //remove all children
+  if(!document.getElementById('rootLoading')){
+    var loadiv = GenLoadingDiv();
+    //console.log(loadiv);
+    document.getElementById('bodyRenderSection').appendChild(loadiv);
+  }
   let url = window.origin + '/comic';
   if(history){
     window.history.pushState(null, null, url);
@@ -185,6 +195,13 @@ function LoadBook(type, subtype, inkey=null){
 function DisplayBook(type, title){
   //console.log(type + ' ---- ' + title);
   var name = title.toLowerCase();
+  if(type == 'manga'){
+    document.getElementById('mangaLi').setAttribute('style', 'color: rgb(209, 21, 146)');
+    document.getElementById('comicLi').removeAttribute('style');
+  } else if(type == 'comic'){
+    document.getElementById('comicLi').setAttribute('style', 'color:rgb(0,98,255)');
+    document.getElementById('mangaLi').removeAttribute('style');
+  }
   var url = window.origin + '/book/open?type=' + type + '&title=' + title;
   window.history.pushState(null,null, url);
   window.sessionStorage.setItem('path', window.location.pathname);
@@ -192,6 +209,9 @@ function DisplayBook(type, title){
   window.sessionStorage.setItem('title', title);
   window.sessionStorage.removeItem('url');
   //console.log(window.sessionStorage);
+  if(document.getElementById('rootLoading')){
+    document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootLoading'));
+  }
   fetch(url, {
     method: 'GET',
     credentials: "include"
@@ -203,13 +223,10 @@ function DisplayBook(type, title){
 
     if(resobj.success){
       //
-      var rendersection = document.getElementById('bodyRenderSection');
-      while(rendersection.lastElementChild){
-        rendersection.removeChild(rendersection.firstElementChild);
-      }
-      rendersection.insertAdjacentHTML('beforeend', resobj.str);
-      window.scrollTo(0,0);
-      document.getElementById('headBar').scrollIntoView();
+      ChildRemove('bodyPlaceHolder'); // remove all children
+      bodyPlaceHolder.insertAdjacentHTML('beforeend', resobj.str);
+      window.scrollTo(0,document.getElementById('bodyNaviLinks').offsetHeight + document.getElementById('headBar').offsetHeight);
+      //document.getElementById('headBar').scrollIntoView();
     }else {
       throw new Error('Error reply from server.');
     }
@@ -291,12 +308,14 @@ function DisplayChapterContent(event,chapprefix){
   }).then(resobj=>{
     event.target.classList.add('chaptitle-clicked');
     let wrapdiv = document.createElement('div');
+    let chapnavi = document.createElement('div');
+    chapnavi.classList.add('floating-top-div');
     wrapdiv.setAttribute('data-chapter', inchap);
     //chap title
     let h3 = document.createElement('h3');
     h3.innerHTML = inchap;
     h3.classList.add('chaptitle-decor');
-    wrapdiv.appendChild(h3);
+    chapnavi.appendChild(h3);
 
     //**************  button 
     let butdiv = document.createElement('div');
@@ -331,7 +350,8 @@ function DisplayChapterContent(event,chapprefix){
     }
     nexbutt.innerHTML = "Next Chapter";
     butdiv.appendChild(nexbutt);
-    wrapdiv.appendChild(butdiv);
+    chapnavi.appendChild(butdiv);
+    wrapdiv.appendChild(chapnavi);
     //************ END BUTTON */
 
     if(resobj.success){
@@ -528,20 +548,37 @@ function GenLoadingDiv(){
   return div;
 } // END GENERATING PRELOADING FUNCTION
 
+/**Child removing functionn */
+function ChildRemove(parentname){
+  if(document.getElementById(parentname) && document.getElementById(parentname).children.length != 0){
+    while(document.getElementById(parentname).lastElementChild){
+      document.getElementById(parentname).removeChild(document.getElementById(parentname).firstElementChild);
+    }
+  }
+} // END REMOVING CHILDREN FUNCTIOON
+
 /**HANDLING POPSTATE WHEN USER CLICK BACK BUTTON */
 window.onpopstate = function (event){
   //this.alert(window.location);
-  this.console.log(window.sessionStorage);
-  this.console.log(window.location);
+  /* console.log('pop state');
+  this.console.log(window.location); */
+  //this.console.log(window.sessionStorage);
+
+  let mangali = document.getElementById('mangaLi');
+  let comicli = document.getElementById('comicLi');
 
   if(window.location.pathname == '/manga'){
-    this.LoadMangaPage(false);
+    mangali.setAttribute('style', 'color: rgb(209, 21, 146)');
+    comicli.removeAttribute('style');
+    this.LoadMangaPage(true);
   } else if(window.location.pathname == '/comic'){
-    this.LoadComicPage(false);
+    comicli.setAttribute('style', 'color:rgb(0,98,255)');
+    mangali.removeAttribute('style');
+    this.LoadComicPage(true);
   } else if (window.location.pathname == '/book/open'){
-    //this.DisplayBook.call(null, )
+    this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title);
   } else {
-    this.LoadMangaPage(false);
+    this.LoadMangaPage(true);
   }
 }; //END HANDLING POPSTATE OF WINDOWS 
 

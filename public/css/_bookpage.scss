@@ -9,6 +9,8 @@
   justify-content: space-around;
   align-content: center;
   scroll-snap-type: y mandatory;
+  border-top: 1px solid black;
+  padding-top: 5px;
 }
 
 // ------------ COVER IMAGE AND SUMMARY
@@ -21,7 +23,7 @@
   align-items: center;
   padding-top: 18px;
   margin-bottom: 12px;
-  box-shadow: 0px 0px 20px -12px black;
+  box-shadow: 0px 5px 10px -12px black;
   .bookpage-img-cover{
    flex: 0 0 40vw;
    text-align: center; //using this to center image
@@ -130,7 +132,9 @@
   scroll-snap-align: end;
   //box-shadow: 0 -5px 8px -8px;
   margin-top: 10px;
-  
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0
 }
 
 /* .chapter-pages-wrapper{
@@ -148,7 +152,7 @@
   margin: auto;
   margin-top: 1vh;
   margin-bottom: 1vh;
-  //max-height: 80vh;
+  max-height: 80vh;
   text-align: center;
   padding-bottom: 10px;
   box-shadow: 0 8px 8px -8px grey;
@@ -157,6 +161,14 @@
     height: auto;
   }
 }
+
+//FLOATING CHAP DIV
+.floating-top-div{
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+}
+
 // TITLE OF DISPLAY CHAPTER
 .chaptitle-decor{
   display: inline-block;
