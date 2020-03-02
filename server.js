@@ -26,44 +26,36 @@ app.use(cors());
 
 if(process.env.NODE_ENV == 'production'){
   app.use(express.static(path.join(__dirname, 'public'), {
-    //maxAge: 43200000, //half of a day
+    maxAge: 43200000, //half of a day
     etag: true,
     lastModified: true,
-    setHeaders: function(res, path){
+    /* setHeaders: function(res, path){
       var hashRegex = new RegExp('\\.[0-9a-f]{8}\\.');
-      if(path.endsWith('.html')){
-        res.setHeader('Cache-Control', 'no-cache');
-      } else if(hashRegex.test(path)){
+      if(hashRegex.test(path)){
         res.setHeader('Cache-Control', 'max-age=43200000');
       }
-    }
+    } */
   }));
   app.use((req,res,next)=>{
     //later inspect req url to get pathname for cache control
-    res.set({
-      'Cache-Control': 'public'
-    });
+    
     res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=https://domkie.com/creator/user";
     res.locals.logouturl = 'https://domkie.com';
     next();
-  })
+  });
 } else {
   app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: 0, //half of a day
+    maxAge:0,
     setHeaders: function(res, path){
-      if(path.endsWith('.html')){
-        res.setHeader('Cache-Control', 'no-cache');
-      }
     }
   }));
   app.use((req, res, next)=>{
-    res.set({
-      'Cache-Control': 'no-store'
-    });
+    //set no-cache no-store for dev
+    res.set('Cache-Control', 'no-cache');
     res.locals.logurl = "https://domkie.auth.us-west-2.amazoncognito.com/login?response_type=code&client_id=3bpnd386ku67jlgbftpmo79c12&redirect_uri=http://localhost:8008/creator/user";
     res.locals.logouturl = 'http://localhost:8008';
     next();
-  })
+  });
 }
 /** dealing with COOKIE AND SESSION STORE */
 var sess={
@@ -124,11 +116,14 @@ app.use((req, res, next)=>{
 
 /**General handling */
 app.get('/', (req, res)=>{
+  res.set('Cache-Control', 'public');
   res.render('index');
 }); // END GENERAL HANDLING
 
 /* Fetching manga homepage */
 app.get('/manga', (req,res)=>{
+  //setting revalidate on proxy or shared cache
+  res.set('Cache-Control', 'proxy-revalidate,no-cache'); 
   (async function(){
     kaw.HomepageManga()
     .then(introMangaBooks =>{
@@ -155,6 +150,8 @@ app.get('/manga', (req,res)=>{
 
 /* Fetching comic homepage */
 app.get('/comic', (req,res)=>{
+  //for now just set public cuz nothing gonna changed yet
+  res.set('Cache-Control', 'public');
   ejs.renderFile('views/partials/comic.ejs')
   /* .then(comstr=>{
     return ejs.renderFile('views/partials/homepage.ejs', {page: comstr});
@@ -178,15 +175,18 @@ app.get('/404', (req, res)=>{
 });
 
 app.get('/500', (req, res)=>{
-  res.render('500')
+  res.render('500');
 })
 app.get('/ads.txt', (req, res)=>{
+  res.set('Cache-Control','public');
   res.setHeader('Content-Type', 'text/plain');
   res.sendFile(__dirname + '/ads.txt');
 });
 
 app.use('/book', (req, res, next)=>{
   //applog(req.session.login);
+  //revalidate before using the cache
+  res.set('Cache-Control', 'no-cache,proxy-revalidate');
   next();
 }, bookroute);
 

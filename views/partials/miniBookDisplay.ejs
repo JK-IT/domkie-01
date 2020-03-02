@@ -23,7 +23,7 @@
   subtype = book.subtype.S;
   var imgurl = book.s3link + 'cover.jpg';
 %>
-<div class="book-display" onclick="DisplayBook('manga', '<%= book.title%>')">
+<div class="book-display" onclick="DisplayBook('manga', '<%= book.title%>', true)">
   <img src="<%= imgurl%>">
   <p><%= book.title %></p>
   <p><%= book.rating.S%> &#11088;</p>

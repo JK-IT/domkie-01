@@ -3,7 +3,15 @@ var rev = require('gulp-rev-all');
 var inje = require('gulp-inject');
 var cssmini = require('gulp-clean-css');
 var jsmini = require('gulp-uglify-es').default;
+var del = require('del');
 //var pipeline = require('readable-stream').pipeline;
+
+gu.task('del-static', function(){
+    return del([
+        '../dkpro/public/css/*',
+        '../dkpro/public/js/*'
+    ]);
+});
 
 gu.task('mini-rev', function(){
     var index = gu.src('./views/index.ejs');
@@ -50,4 +58,4 @@ gu.task('copy', function(){
     .pipe(gu.dest('../dkpro/'));
 });
 
-gu.task('default', gu.series(['mini-rev','inject','copy']));
+gu.task('default', gu.series(['del-static','mini-rev','inject','copy']));

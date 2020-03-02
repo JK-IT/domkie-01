@@ -1,15 +1,16 @@
 window.onload = function(event){  
-  /* this.console.log('loading...');
-  this.console.log(window.sessionStorage); */
+  this.console.log('loading...');
+  /* */
+  this.console.log(window.sessionStorage); 
   if(window.sessionStorage.length == 0){
     this.LoadMangaPage(true);
   } else {
-    if(window.sessionStorage.path == '/manga'){
+    if(window.sessionStorage.hash == '#manga'){
       this.LoadMangaPage(true);
-    } else if(window.sessionStorage.path == '/comic'){
+    } else if(window.sessionStorage.hash == '#comic'){
       this.LoadComicPage(true);
-    } else if(window.sessionStorage.path == '/book/open'){
-      this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title);
+    } else if(window.sessionStorage.hash == '#book'){
+      this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title, true);
     }
   }
 };
@@ -21,11 +22,13 @@ window.onbeforeunload = function(event){
   //this.console.log(window.sessionStorage);
 };
 
+/* 
 window.onunload = function(event){
-  /* this.console.log('unload');
-  this.console.log(window.sessionStorage); */
+  this.console.log('unload');
   window.location.assign(window.origin + '/');
+  this.console.log(window.sessionStorage);
 };
+ */
 
 /**Calling to Root  */
 function RootLink(){
@@ -45,9 +48,8 @@ function LoadMangaPage(history = false){
   
   var fetchurl = window.origin + '/manga';
   if(history){
-    window.history.pushState(null, null, fetchurl);
-    window.sessionStorage.setItem('path', window.location.pathname);
-    window.sessionStorage.setItem('url', window.location.href);
+    window.history.pushState(null, null, window.origin +'#manga');
+    window.sessionStorage.setItem('hash', window.location.hash);
     //console.log(window.sessionStorage);
   }
 
@@ -95,9 +97,8 @@ function LoadComicPage(history = false){
   }
   let url = window.origin + '/comic';
   if(history){
-    window.history.pushState(null, null, url);
-    window.sessionStorage.setItem('path', window.location.pathname);
-    window.sessionStorage.setItem('url', window.location.href);
+    window.history.pushState(null, null, window.origin + '#comic');
+    window.sessionStorage.setItem('hash', window.location.hash);
     //console.log(window.sessionStorage);
   }
   fetch(url, {
@@ -192,7 +193,7 @@ function LoadBook(type, subtype, inkey=null){
 } // =======>>>>>>>> LOAD BOOK FUNCTION
 
 //--------display book info and chapter lists
-function DisplayBook(type, title){
+function DisplayBook(type, title, history=false){
   //console.log(type + ' ---- ' + title);
   var name = title.toLowerCase();
   if(type == 'manga'){
@@ -203,11 +204,12 @@ function DisplayBook(type, title){
     document.getElementById('mangaLi').removeAttribute('style');
   }
   var url = window.origin + '/book/open?type=' + type + '&title=' + title;
-  window.history.pushState(null,null, url);
-  window.sessionStorage.setItem('path', window.location.pathname);
-  window.sessionStorage.setItem('type', type);
-  window.sessionStorage.setItem('title', title);
-  window.sessionStorage.removeItem('url');
+  if(history){
+    window.history.pushState(null,null, window.origin + '#book');
+    window.sessionStorage.setItem('hash', '#book');
+    window.sessionStorage.setItem('type', type);
+    window.sessionStorage.setItem('title', title);
+  }
   //console.log(window.sessionStorage);
   if(document.getElementById('rootLoading')){
     document.getElementById('bodyRenderSection').removeChild(document.getElementById('rootLoading'));
@@ -344,7 +346,7 @@ function DisplayChapterContent(event,chapprefix){
       let nexchapprefix = booktitle +'/' +nexchaptitle;
       nexbutt.addEventListener('click', function(e){
         e.preventDefault();
-        console.log('next chapter -- ' + nexchapprefix);
+        //console.log('next chapter -- ' + nexchapprefix);
         DisplayChapterContent.call(null,event, nexchapprefix);
       });
     }
@@ -567,16 +569,16 @@ window.onpopstate = function (event){
   let mangali = document.getElementById('mangaLi');
   let comicli = document.getElementById('comicLi');
 
-  if(window.location.pathname == '/manga'){
+  if(window.location.hash == '#manga'){
     mangali.setAttribute('style', 'color: rgb(209, 21, 146)');
     comicli.removeAttribute('style');
-    this.LoadMangaPage(true);
-  } else if(window.location.pathname == '/comic'){
+    this.LoadMangaPage(false);
+  } else if(window.location.hash == '#comic'){
     comicli.setAttribute('style', 'color:rgb(0,98,255)');
     mangali.removeAttribute('style');
-    this.LoadComicPage(true);
-  } else if (window.location.pathname == '/book/open'){
-    this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title);
+    this.LoadComicPage(false);
+  } else if (window.location.hash == '#book'){
+    this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title, false);
   } else {
     this.LoadMangaPage(true);
   }

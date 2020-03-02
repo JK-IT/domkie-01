@@ -10,7 +10,7 @@
   <div class="new-coming">
 
     <%for(let upmanga of introManga.upbook){%>
-      <div class="new-book-div" onclick="DisplayBook('manga','<%= upmanga.title%>')">
+      <div class="new-book-div" onclick="DisplayBook('manga','<%= upmanga.title%>', true)">
         <%var imglink = upmanga.s3link + "cover.jpg"%>
         <div class="new-book-img"><img src="<%= imglink%>"> </div>
         <div class="new-book-info">
@@ -28,7 +28,7 @@
   <div class="featured-book">
 
     <%for(let featbook of introManga.featbook){%>
-      <div class="featured-book-div" onclick="DisplayBook('manga','<%= featbook.title%>')">
+      <div class="featured-book-div" onclick="DisplayBook('manga','<%= featbook.title%>',true)">
         <%var imglink = featbook.s3link + "cover.jpg"%>
         <div class="featured-img"><img src="<%= imglink%>"></div>
         <div class="featured-info">
