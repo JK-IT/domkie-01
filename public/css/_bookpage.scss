@@ -191,3 +191,11 @@
   display: inline-block;
   @extend %gene-button;
 }
+
+/**
+  DEFINES SMALL SCREEN SIZE RULES
+*/
+
+@media screen and (max-width: 768px) and (orientation:portrait){
+  
+}

@@ -1,13 +1,22 @@
 window.onload = function(event){  
+  
+  /* 
   this.console.log('loading...');
-  /* */
-  this.console.log(window.sessionStorage); 
+  this.console.log(window.sessionStorage);
+  */
+   
   if(window.sessionStorage.length == 0){
     this.LoadMangaPage(true);
   } else {
+    var mangali = document.getElementById('mangaLi');
+    var comicli = document.getElementById('comicLi');
     if(window.sessionStorage.hash == '#manga'){
+      mangali.setAttribute('style', 'color: rgb(209, 21, 146)');
+      comicli.removeAttribute('style');
       this.LoadMangaPage(true);
     } else if(window.sessionStorage.hash == '#comic'){
+      comicli.setAttribute('style', 'color:rgb(0,98,255)');
+      mangali.removeAttribute('style');
       this.LoadComicPage(true);
     } else if(window.sessionStorage.hash == '#book'){
       this.DisplayBook(window.sessionStorage.type, window.sessionStorage.title, true);

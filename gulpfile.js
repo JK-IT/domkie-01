@@ -10,7 +10,7 @@ gu.task('del-static', function(){
     return del([
         '../dkpro/public/css/*',
         '../dkpro/public/js/*'
-    ]);
+    ], {force: true});
 });
 
 gu.task('mini-rev', function(){

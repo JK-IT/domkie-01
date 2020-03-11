@@ -59,16 +59,16 @@ if(process.env.NODE_ENV == 'production'){
 }
 /** dealing with COOKIE AND SESSION STORE */
 var sess={
-  secret: 'bokiesectcat',
-  cookie:{path: '/', sameSite: 'lax'},
+  secret: 'bokiesectcatsowhatever',
+  cookie:{sameSite: 'lax'},
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   //name: 'Domkie Creator',
   store: new memstore({
     //checkPeriod: 86400000,
-    ttl: 43200000
+    //ttl: 43200000
   })
-}
+};
 if(process.env.NODE_ENV != 'production'){
   app.use(morgan('combined'));
 }else {
@@ -77,45 +77,13 @@ if(process.env.NODE_ENV != 'production'){
 }
 app.use(exsession(sess));
 
-app.use((req, res, next)=>{
-  //applog('Request going through here');
-  //applog(req.session.id);
-  if(!req.session.domkie){
-    req.session.domkie = {
-      loggedin: false,
-      acccode: null,
-      refcode: null,
-      userinfo: null
-    };
-    res.locals.loggedin = false;
-  } else {
-    //applog(JSON.stringify(req.session.domkie));
-    //FIX THIS
-    //{"loggedin":true,"authcode":"ca733154-08e0-41d0-b7aa-228a5a81aad2","userinfo":null}
-    if(req.session.domkie.loggedin && req.session.domkie.userinfo){
-      //display banner
-      res.locals.loggedin = req.session.domkie.loggedin;
-      //display user name on homepage
-      res.locals.username = req.session.domkie.userinfo.name;
-      //url return to userhub on homepage
-      res.locals.userurl = req.protocol + '://' + req.get('host') + '/creator/user';
-    } /* else if(req.session.domkie.loggedin){
-      
-    } */ else if(!req.session.domkie.loggedin && req.query.code){ //code u just return from amazon log in screen
-      //set this to use in creator banner ejs
-      res.locals.loggedin = true; 
-      res.locals.username = null;
-    } else {
-      res.locals.loggedin = false;
-    }
-  }
-  next();
-});
+
 //DONE WITH COOKIE AND SESSION STORE
 
 
 /**General handling */
 app.get('/', (req, res)=>{
+  req.session.cookie.path = '/';
   res.set('Cache-Control', 'public');
   res.render('index');
 }); // END GENERAL HANDLING
@@ -123,7 +91,8 @@ app.get('/', (req, res)=>{
 /* Fetching manga homepage */
 app.get('/manga', (req,res)=>{
   //setting revalidate on proxy or shared cache
-  res.set('Cache-Control', 'proxy-revalidate,no-cache'); 
+  req.session.cookie.path = '/manga';
+  res.set('Cache-Control', 'public'); //'proxy-revalidate,no-cache'
   (async function(){
     kaw.HomepageManga()
     .then(introMangaBooks =>{
@@ -151,6 +120,7 @@ app.get('/manga', (req,res)=>{
 /* Fetching comic homepage */
 app.get('/comic', (req,res)=>{
   //for now just set public cuz nothing gonna changed yet
+  req.session.cookie.path = '/comic';
   res.set('Cache-Control', 'public');
   ejs.renderFile('views/partials/comic.ejs')
   /* .then(comstr=>{
@@ -176,7 +146,7 @@ app.get('/404', (req, res)=>{
 
 app.get('/500', (req, res)=>{
   res.render('500');
-})
+});
 app.get('/ads.txt', (req, res)=>{
   res.set('Cache-Control','public');
   res.setHeader('Content-Type', 'text/plain');
@@ -186,7 +156,8 @@ app.get('/ads.txt', (req, res)=>{
 app.use('/book', (req, res, next)=>{
   //applog(req.session.login);
   //revalidate before using the cache
-  res.set('Cache-Control', 'no-cache,proxy-revalidate');
+  req.session.cookie.path = '/book';
+  res.set('Cache-Control', 'public');
   next();
 }, bookroute);
 
@@ -206,4 +177,4 @@ app.listen(port, '127.0.0.1', (err)=>{
   } else {
     applog('SERVER IS RUNNING, environment ' + port + ' ' + process.env.NODE_ENV);
   }
-})
+});
