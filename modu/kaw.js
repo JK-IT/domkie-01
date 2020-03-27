@@ -21,7 +21,7 @@ if(process.env.NODE_ENV != 'production'){
 kawaz.config.apiVersions = {
   cognitoidentityserviceprovider: '2016-04-18',
   cognitoidentity: '2014-06-30'
-}
+};
 
 kawaz.config.update({region: 'us-west-2'});
 /* kawaz.config.credentials = new kawaz.CognitoIdentityCredentials({
@@ -104,7 +104,7 @@ kaw.HomepageManga = function(){
       KeyConditionExpression: "#t = :ty AND #r > :ra",
       Limit: 6,
       ScanIndexForward: false
-    }
+    };
 
     var featuredbook = new Promise((featresolve, featreject)=>{
       dynamo.query(featuredpara, (err, data)=>{
@@ -154,7 +154,7 @@ kaw.HomepageManga = function(){
           upres(featuredbook);
         })();
 
-      })
+      });
 
     })
     .then(featuredata =>{
