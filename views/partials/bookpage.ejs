@@ -35,12 +35,38 @@ app:book-router    '{\r\n  "chapterlist": [\r\n    "Chapter 001  Question Genius
     </div><!--GENRE SUM DIV--> 
   </div><!--BOOK PAGE HEAD-->
 
+  <!--In article ads - before chapter list-->
+  <div style="text-align: center; width: 90%;margin: auto;">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+      <ins class="adsbygoogle"
+          style="display:block; text-align:center;"
+          data-ad-layout="in-article"
+          data-ad-format="fluid"
+          data-ad-client="ca-pub-3062165550077294"
+          data-ad-slot="4846405216"></ins>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
   <div class="bookpage-chaplist"> <!--BOOK PAGE CHAP LIST-->
     <% for(let chap of bookdetail.chaplist){%>
       <% var chapprefix = bookdetail.title + '/' + chap%>
       <p onclick="DisplayChapterContent(event ,'<%= chapprefix%>')"><%= chap%> </p>
-      
     <%}%>
+      <!--ADDSSSS - inrow -->
+      <div style="text-align: center; width: 90%;margin: auto;">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+          <ins class="adsbygoogle"
+              style="display:block"
+              data-ad-format="fluid"
+              data-ad-layout-key="-gw-3+1f-3d+2z"
+              data-ad-client="ca-pub-3062165550077294"
+              data-ad-slot="2695239816"></ins>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
   </div> <!--BOOK PAGE CHAP LIST-->
 
   <!--This will be used to display the chapter content-->
